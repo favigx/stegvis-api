@@ -13,10 +13,12 @@ import java.security.Key;
 
 import com.stegvis_api.stegvis_api.exception.type.AuthenticationException;
 import com.stegvis_api.stegvis_api.exception.type.UserAlreadyExistsException;
+import com.stegvis_api.stegvis_api.exception.type.UserNotFoundException;
 import com.stegvis_api.stegvis_api.user.dto.UserLoginDTO;
 import com.stegvis_api.stegvis_api.user.dto.UserLoginResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserRegistrationDTO;
 import com.stegvis_api.stegvis_api.user.model.User;
+import com.stegvis_api.stegvis_api.user.model.UserPreference;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -75,9 +77,28 @@ public class UserService {
         return new UserLoginResponse(token, "Bearer", jwtExpirationMs, user.getEmail());
     }
 
+    public User setUserPreferences(String userId, UserPreference userPreference) {
+        User user = getUserById(userId);
+
+        if (user == null) {
+            throw new UserNotFoundException("Användare med id " + userId + " hittade inte");
+        }
+
+        user.setUserPreference(userPreference);
+
+        return mongoOperations.save(user);
+
+    }
+
     private User getUserByEmail(String email) {
         Query query = new Query();
         query.addCriteria(Criteria.where("email").is(email));
+        return mongoOperations.findOne(query, User.class);
+    }
+
+    private User getUserById(String userId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(userId));
         return mongoOperations.findOne(query, User.class);
     }
 }

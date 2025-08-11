@@ -2,7 +2,9 @@ package com.stegvis_api.stegvis_api.user.controller;
 
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,9 +12,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.stegvis_api.stegvis_api.user.dto.UserLoginDTO;
 import com.stegvis_api.stegvis_api.user.dto.UserLoginResponse;
+import com.stegvis_api.stegvis_api.user.dto.UserPreferenceResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserRegistrationDTO;
 import com.stegvis_api.stegvis_api.user.dto.UserRegistrationResponse;
 import com.stegvis_api.stegvis_api.user.model.User;
+import com.stegvis_api.stegvis_api.user.model.UserPreference;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -48,6 +52,20 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<UserLoginResponse> loginUser(@Valid @RequestBody UserLoginDTO loginDTO) {
         UserLoginResponse response = userService.loginUser(loginDTO);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/preferences")
+    public ResponseEntity<UserPreferenceResponse> updateUserPreferences(
+            @PathVariable("id") String userId, @RequestBody UserPreference userPreference) {
+
+        User updatedUser = userService.setUserPreferences(userId, userPreference);
+
+        UserPreferenceResponse response = UserPreferenceResponse.builder()
+                .userId(updatedUser.getId())
+                .userPreference(updatedUser.getUserPreference())
+                .build();
+
         return ResponseEntity.ok(response);
     }
 }
