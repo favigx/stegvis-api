@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.user;
+package com.stegvis_api.stegvis_api.user.model;
 
 import org.springframework.data.annotation.Id;
 

@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.user;
+package com.stegvis_api.stegvis_api.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRegistrationResponse {
-    private String id;
+public class UserLoginResponse {
+
+    private String token;
+    private String tokenType = "Bearer";
+    private long expiresIn;
     private String email;
 }
