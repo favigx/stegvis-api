@@ -11,8 +11,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserLoginResponse {
 
+    private String id;
+    private String email;
     private String token;
     private String tokenType = "Bearer";
     private long expiresIn;
-    private String email;
+
 }

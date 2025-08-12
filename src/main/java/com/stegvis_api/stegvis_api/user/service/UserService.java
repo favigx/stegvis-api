@@ -46,7 +46,7 @@ public class UserService {
         User user = new User();
 
         if (getUserByEmail(userRegistrationDTO.getEmail()) != null) {
-            throw new UserAlreadyExistsException("Användarnamnet är upptaget");
+            throw new UserAlreadyExistsException("E-posten är redan kopplat till ett konto");
         }
 
         String encryptedPassword = passwordEncoder.encode(userRegistrationDTO.getPassword());
@@ -74,7 +74,7 @@ public class UserService {
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
 
-        return new UserLoginResponse(token, "Bearer", jwtExpirationMs, user.getEmail());
+        return new UserLoginResponse(user.getId(), user.getEmail(), token, "Bearer", jwtExpirationMs);
     }
 
     public User setUserPreferences(String userId, UserPreference userPreference) {

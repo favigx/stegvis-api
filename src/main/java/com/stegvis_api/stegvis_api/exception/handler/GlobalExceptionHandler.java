@@ -46,11 +46,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        StringBuilder errors = new StringBuilder();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ");
-        }
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errors.toString());
+        String firstErrorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("Ogiltig inmatning");
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), firstErrorMessage);
         return ResponseEntity.badRequest().body(errorResponse);
     }
 }
