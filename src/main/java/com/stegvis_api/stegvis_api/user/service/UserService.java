@@ -46,7 +46,7 @@ public class UserService {
         User user = new User();
 
         if (getUserByEmail(userRegistrationDTO.getEmail()) != null) {
-            throw new UserAlreadyExistsException("E-posten är redan kopplat till ett konto");
+            throw new UserAlreadyExistsException("E-posten är redan kopplad till ett konto");
         }
 
         String encryptedPassword = passwordEncoder.encode(userRegistrationDTO.getPassword());
@@ -61,7 +61,7 @@ public class UserService {
         User user = getUserByEmail(userLoginDTO.getEmail());
 
         if (user == null || !passwordEncoder.matches(userLoginDTO.getPassword(), user.getPassword())) {
-            throw new AuthenticationException("Ogiltig email eller lösenord");
+            throw new AuthenticationException("Ogiltlig e-post eller lösenord");
         }
 
         byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
