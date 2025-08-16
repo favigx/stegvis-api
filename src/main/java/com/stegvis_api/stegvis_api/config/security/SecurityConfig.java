@@ -22,7 +22,11 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll());
+                        .requestMatchers("/api/user/register", "/api/user/login").permitAll()
+                        .requestMatchers("/api/user/logout").authenticated()
+                        .requestMatchers("/api/user/{id}/**").authenticated()
+                        .requestMatchers("/api/calender/task/**").authenticated()
+                        .requestMatchers("/api/onboarding/**").authenticated());
 
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 

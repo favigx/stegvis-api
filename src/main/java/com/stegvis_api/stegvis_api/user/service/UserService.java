@@ -23,6 +23,8 @@ import com.stegvis_api.stegvis_api.user.model.UserPreference;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class UserService {
@@ -57,7 +59,7 @@ public class UserService {
         return mongoOperations.save(user);
     }
 
-    public UserLoginResponse loginUser(UserLoginDTO userLoginDTO) {
+    public UserLoginResponse loginUser(UserLoginDTO userLoginDTO, HttpServletResponse response) {
         User user = getUserByEmail(userLoginDTO.getEmail());
 
         if (user == null || !passwordEncoder.matches(userLoginDTO.getPassword(), user.getPassword())) {
@@ -68,13 +70,22 @@ public class UserService {
         Key key = Keys.hmacShaKeyFor(keyBytes);
 
         String token = Jwts.builder()
-                .setSubject(user.getEmail())
+                .setSubject(user.getId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
 
-        return new UserLoginResponse(user.getId(), user.getEmail(), token, "Bearer", jwtExpirationMs);
+        Cookie cookie = new Cookie("jwt", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (jwtExpirationMs / 1000));
+        response.setHeader("Set-Cookie", "jwt=" + token + "; Max-Age=" + (int) (jwtExpirationMs / 1000)
+                + "; Path=/; HttpOnly; Secure; SameSite=Strict");
+        response.addCookie(cookie);
+
+        return new UserLoginResponse(user.getId(), user.getEmail());
     }
 
     public User setUserPreferences(String userId, UserPreference userPreference) {
@@ -90,7 +101,7 @@ public class UserService {
 
     }
 
-    private User getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         Query query = new Query();
         query.addCriteria(Criteria.where("email").is(email));
         return mongoOperations.findOne(query, User.class);

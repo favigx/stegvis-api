@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +16,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -24,11 +26,17 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Value("${jwtSecret}")
     private String jwtSecret;
 
-    @SuppressWarnings("null")
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(
+            @org.springframework.lang.NonNull HttpServletRequest request,
+            @org.springframework.lang.NonNull HttpServletResponse response,
+            @org.springframework.lang.NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        String token = extractTokenFromRequest(request);
+
+        String token = extractTokenFromCookie(request);
 
         if (token != null) {
             try {
@@ -39,15 +47,17 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                         .getBody();
 
                 Date expirationDate = claims.getExpiration();
-
                 if (expirationDate.before(new Date())) {
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
                     return;
                 }
 
-                String username = claims.getSubject();
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,
-                        null, List.of());
+                String userId = claims.getSubject();
+
+                UserPrincipal userPrincipal = (UserPrincipal) userDetailsService.loadUserById(userId);
+
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userPrincipal, null, userPrincipal.getAuthorities());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -61,10 +71,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String extractTokenFromRequest(HttpServletRequest request) {
-        String headerValue = request.getHeader("Authorization");
-        if (headerValue != null && headerValue.startsWith("Bearer ")) {
-            return headerValue.substring(7).trim();
+    private String extractTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }
