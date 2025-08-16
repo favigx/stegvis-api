@@ -20,7 +20,6 @@ public class UserPrincipal implements UserDetails {
         this.password = password;
     }
 
-    // Factory method för att skapa UserPrincipal från User entity
     public static UserPrincipal fromUser(User user) {
         return new UserPrincipal(
                 user.getId(),
@@ -34,7 +33,6 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Returnera roller om du har, annars tom lista
         return Collections.emptyList();
     }
 
