@@ -1,8 +1,5 @@
 package com.stegvis_api.stegvis_api.exception.handler;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
