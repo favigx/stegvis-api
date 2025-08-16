@@ -96,7 +96,7 @@ public class UserService {
         return mongoOperations.findOne(query, User.class);
     }
 
-    private User getUserById(String userId) {
+    public User getUserById(String userId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("id").is(userId));
         return mongoOperations.findOne(query, User.class);
