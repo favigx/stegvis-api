@@ -16,9 +16,9 @@ public class PasswordEncrypt {
     public PasswordEncoder passwordEncoder() {
         int saltLength = 16;
         int hashLength = 32;
-        int parallelism = 1;
-        int memory = 19456;
-        int iterations = 2;
+        int parallelism = 2;
+        int memory = 65536;
+        int iterations = 3;
 
         return new Argon2PasswordEncoder(
                 saltLength, hashLength, parallelism, memory, iterations) {
