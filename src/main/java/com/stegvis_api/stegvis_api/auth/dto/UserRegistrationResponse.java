@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.user.dto;
+package com.stegvis_api.stegvis_api.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLoginResponse {
-
+public class UserRegistrationResponse {
     private String id;
     private String email;
 }
