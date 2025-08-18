@@ -31,7 +31,17 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @org.springframework.lang.NonNull HttpServletRequest request,
             @org.springframework.lang.NonNull HttpServletResponse response,
-            @org.springframework.lang.NonNull FilterChain filterChain) throws ServletException, IOException {
+            @org.springframework.lang.NonNull FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String path = request.getRequestURI();
+
+        if (path.startsWith("/api/auth/login") ||
+                path.startsWith("/api/auth/register") ||
+                path.startsWith("/api/auth/refresh")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String token = extractTokenFromCookie(request);
 
@@ -40,14 +50,18 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 String userId = jwtTokenService.validateAndGetUserId(token);
                 UserPrincipal userPrincipal = (UserPrincipal) userDetailsService.loadUserById(userId);
 
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userPrincipal, null,
-                        userPrincipal.getAuthorities());
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        userPrincipal, null, userPrincipal.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
                 SecurityContextHolder.clearContext();
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                return;
             }
+        } else {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
         }
 
         filterChain.doFilter(request, response);

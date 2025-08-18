@@ -25,7 +25,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/api/auth/logout").authenticated()
-                        .requestMatchers("/api/auth/*/**").authenticated()
                         .requestMatchers("/api/calender/task/**").authenticated()
                         .requestMatchers("/api/onboarding/**").authenticated()
                         .anyRequest().authenticated())
