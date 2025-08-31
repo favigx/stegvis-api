@@ -1,5 +1,6 @@
 package com.stegvis_api.stegvis_api.auth;
 
+import com.stegvis_api.stegvis_api.auth.dto.RefreshTokenResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginDTO;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationDTO;
@@ -57,10 +58,10 @@ public class AuthService {
         jwtTokenService.setJwtCookie(response, accessToken);
         jwtRefreshTokenService.setRefreshCookie(response, refreshToken);
 
-        return new UserLoginResponse(user.getId(), user.getEmail());
+        return new UserLoginResponse(user.getId(), user.getEmail(), user.isHasCompletedOnboarding());
     }
 
-    public UserLoginResponse refreshToken(String refreshToken, HttpServletResponse response) {
+    public RefreshTokenResponse refreshToken(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
             throw new AuthenticationException("Refresh token is missing");
         }
@@ -87,7 +88,7 @@ public class AuthService {
         String newRefreshToken = jwtRefreshTokenService.generateToken(userId);
         jwtRefreshTokenService.setRefreshCookie(response, newRefreshToken);
 
-        return new UserLoginResponse(user.getId(), user.getEmail());
+        return new RefreshTokenResponse(user.getId(), user.getEmail());
     }
 
     public void logout(HttpServletResponse response) {

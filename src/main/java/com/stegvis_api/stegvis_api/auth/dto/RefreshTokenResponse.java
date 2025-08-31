@@ -9,9 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLoginResponse {
-
+public class RefreshTokenResponse {
     private String id;
     private String email;
-    private boolean hasCompletedOnboarding;
 }

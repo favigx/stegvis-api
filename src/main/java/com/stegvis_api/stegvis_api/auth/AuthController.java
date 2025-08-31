@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.stegvis_api.stegvis_api.auth.dto.RefreshTokenResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginDTO;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationDTO;
@@ -50,7 +52,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public UserLoginResponse refresh(@CookieValue(value = "refresh-jwt", required = false) String refreshToken,
+    public RefreshTokenResponse refresh(@CookieValue(value = "refresh-jwt", required = false) String refreshToken,
             HttpServletResponse response) {
         return authService.refreshToken(refreshToken, response);
     }

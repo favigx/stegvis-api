@@ -30,7 +30,18 @@ public class UserService {
         }
 
         user.setUserPreference(userPreference);
+        user.setHasCompletedOnboarding(true);
         return mongoOperations.save(user);
+    }
+
+    public UserPreference getUserPreferences(String userId) {
+        User user = getUserById(userId);
+
+        if (user == null) {
+            throw new UserNotFoundException("Användare med id " + userId + " hittades inte");
+        }
+
+        return user.getUserPreference();
     }
 
     public User getUserByEmail(String email) {
