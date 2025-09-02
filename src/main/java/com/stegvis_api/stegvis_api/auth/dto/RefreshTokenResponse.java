@@ -1,15 +1,12 @@
 package com.stegvis_api.stegvis_api.auth.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.RequiredArgsConstructor;
 
 @Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class RefreshTokenResponse {
-    private String id;
-    private String email;
+    private final String id;
+    private final String email;
 }

@@ -27,10 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public UserDetails loadUserById(String id) {
-        User user = userService.getUserById(id);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with id: " + id);
-        }
+        User user = userService.getUserByIdOrThrow(id);
         return UserPrincipal.fromUser(user);
     }
 }

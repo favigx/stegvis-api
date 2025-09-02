@@ -4,9 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,18 +58,26 @@ public class TaskController {
         return ResponseEntity.created(location).body(response);
     }
 
-    @PreAuthorize("#userId == principal.id")
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<TaskDTO>> getTasksForUser(
-            @PathVariable String userId) {
+    @GetMapping
+    public ResponseEntity<List<TaskDTO>> getTasks(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        List<Task> tasks = taskService.getAllTasksForUser(userPrincipal.getId());
 
-        List<TaskDTO> tasks = taskService.getAllTasksForUser(userId);
-        return ResponseEntity.ok(tasks);
+        List<TaskDTO> dtoList = tasks.stream()
+                .map(task -> TaskDTO.builder()
+                        .id(task.getId())
+                        .subject(task.getSubject())
+                        .type(task.getType())
+                        .deadline(task.getDeadline().toString())
+                        .daysLeft(taskService.calculateDaysLeft(task.getDeadline()))
+                        .pastDue(taskService.calculateDaysLeft(task.getDeadline()) < 0)
+                        .build())
+                .toList();
+
+        return ResponseEntity.ok(dtoList);
     }
 
     @GetMapping("/enum")
     public Map<String, Object> getAllEnums() {
         return taskService.getTypesEnum();
     }
-
 }

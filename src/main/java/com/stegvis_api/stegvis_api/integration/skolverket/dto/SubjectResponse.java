@@ -2,16 +2,12 @@ package com.stegvis_api.stegvis_api.integration.skolverket.dto;
 
 import com.stegvis_api.stegvis_api.integration.skolverket.model.ProgramDetails;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class SubjectResponse {
 
-    private ProgramDetails program;
+    private final ProgramDetails program;
 }

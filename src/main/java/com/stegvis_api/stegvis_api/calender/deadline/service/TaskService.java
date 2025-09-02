@@ -15,7 +15,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.stegvis_api.stegvis_api.calender.deadline.dto.AddTaskDTO;
-import com.stegvis_api.stegvis_api.calender.deadline.dto.TaskDTO;
 import com.stegvis_api.stegvis_api.calender.deadline.model.Task;
 import com.stegvis_api.stegvis_api.calender.deadline.model.enums.Type;
 import com.stegvis_api.stegvis_api.user.service.UserService;
@@ -32,8 +31,7 @@ public class TaskService {
     }
 
     public Task addToCalender(AddTaskDTO addTaskDTO, String userId) {
-
-        userService.getUserById(userId);
+        userService.getUserByIdOrThrow(userId);
 
         Instant instantDeadline = addTaskDTO.getDeadline().toInstant();
 
@@ -47,29 +45,13 @@ public class TaskService {
         return mongoOperations.save(task);
     }
 
-    public List<TaskDTO> getAllTasksForUser(String userId) {
-
-        userService.getUserById(userId);
+    public List<Task> getAllTasksForUser(String userId) {
+        userService.getUserByIdOrThrow(userId);
 
         Query query = new Query();
         query.addCriteria(Criteria.where("userId").is(userId));
 
-        List<Task> tasks = mongoOperations.find(query, Task.class);
-
-        return tasks.stream()
-                .map(task -> {
-                    long daysLeft = calculateDaysLeft(task.getDeadline());
-                    return TaskDTO.builder()
-                            .id(task.getId())
-                            .subject(task.getSubject())
-                            .type(task.getType())
-                            .deadline(task.getDeadline().toString())
-                            .daysLeft(daysLeft)
-                            .pastDue(daysLeft < 0)
-                            .build();
-                })
-                .toList();
-
+        return mongoOperations.find(query, Task.class);
     }
 
     public Map<String, Object> getTypesEnum() {
@@ -92,7 +74,6 @@ public class TaskService {
     public long calculateDaysLeft(Instant deadline) {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Stockholm"));
         ZonedDateTime deadlineZoned = deadline.atZone(ZoneId.of("Europe/Stockholm"));
-
         return ChronoUnit.DAYS.between(now.toLocalDate(), deadlineZoned.toLocalDate());
     }
 }

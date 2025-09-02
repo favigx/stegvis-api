@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.stegvis_api.stegvis_api.exception.dto.ErrorResponse;
 import com.stegvis_api.stegvis_api.exception.type.AuthenticationException;
 import com.stegvis_api.stegvis_api.exception.type.Generic;
+import com.stegvis_api.stegvis_api.exception.type.TodoNotFoundException;
 import com.stegvis_api.stegvis_api.exception.type.UserAlreadyExistsException;
 import com.stegvis_api.stegvis_api.exception.type.UserNotFoundException;
 
@@ -26,6 +27,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(TodoNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTodoNotFound(TodoNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage()));

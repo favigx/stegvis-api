@@ -8,10 +8,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import com.stegvis_api.stegvis_api.calender.deadline.dto.TaskDTO;
-import com.stegvis_api.stegvis_api.calender.deadline.model.Task;
+import com.stegvis_api.stegvis_api.exception.type.TodoNotFoundException;
 import com.stegvis_api.stegvis_api.todolist.dto.AddTodoDTO;
-import com.stegvis_api.stegvis_api.todolist.dto.TodoDTO;
 import com.stegvis_api.stegvis_api.todolist.model.Todo;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
@@ -26,13 +24,8 @@ public class TodoService {
         this.userService = userService;
     }
 
-    public Todo saveTodo(Todo todo) {
-        return mongoOperations.save(todo);
-    }
-
     public Todo createTodo(AddTodoDTO todoDto, String userId) {
-
-        userService.getUserById(userId);
+        userService.getUserByIdOrThrow(userId);
 
         Todo todo = Todo.builder()
                 .userId(userId)
@@ -43,25 +36,37 @@ public class TodoService {
         return saveTodo(todo);
     }
 
-    public List<TodoDTO> getAllTodosForUser(String userId) {
-
-        userService.getUserById(userId);
+    public List<Todo> getAllTodosForUser(String userId) {
+        userService.getUserByIdOrThrow(userId);
 
         Query query = new Query();
         query.addCriteria(Criteria.where("userId").is(userId));
 
-        List<Todo> todos = mongoOperations.find(query, Todo.class);
-
-        return todos.stream()
-                .map(todo -> {
-                    return TodoDTO.builder()
-                            .id(todo.getId())
-                            .todo(todo.getTodo())
-                            .dateTimeCreated(todo.getDateTimeCreated().toString())
-                            .build();
-                })
-                .toList();
-
+        return mongoOperations.find(query, Todo.class);
     }
 
+    public Todo deleteTodoById(String todoId, String userId) {
+        userService.getUserByIdOrThrow(userId);
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(todoId)
+                .and("userId").is(userId));
+
+        Todo todo = mongoOperations.findOne(query, Todo.class);
+        if (todo == null) {
+            throw new TodoNotFoundException(
+                    String.format("Todo med id %s hittades inte för användare %s", todoId, userId));
+        }
+
+        deleteTodo(todo);
+        return todo;
+    }
+
+    public Todo saveTodo(Todo todo) {
+        return mongoOperations.save(todo);
+    }
+
+    public void deleteTodo(Todo todo) {
+        mongoOperations.remove(todo);
+    }
 }

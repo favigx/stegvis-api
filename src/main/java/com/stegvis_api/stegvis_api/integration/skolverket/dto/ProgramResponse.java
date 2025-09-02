@@ -4,17 +4,13 @@ import java.util.List;
 
 import com.stegvis_api.stegvis_api.integration.skolverket.model.Program;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class ProgramResponse {
 
-    private List<Program> programs;
+    private final List<Program> programs;
 
 }

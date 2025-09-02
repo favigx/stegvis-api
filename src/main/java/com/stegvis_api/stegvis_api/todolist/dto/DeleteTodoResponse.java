@@ -7,10 +7,9 @@ import lombok.RequiredArgsConstructor;
 @Builder
 @Getter
 @RequiredArgsConstructor
-public class AddTodoResponse {
-
+public class DeleteTodoResponse {
     private final String id;
     private final String todo;
-    private final String dateTimeCreated;
-
+    private final String deletedAt;
+    private final String message;
 }

@@ -33,9 +33,7 @@ public class AuthController {
     public ResponseEntity<UserRegistrationResponse> registerUser(@RequestBody UserRegistrationDTO dto) {
         User user = authService.register(dto);
 
-        UserRegistrationResponse response = new UserRegistrationResponse();
-        response.setId(user.getId());
-        response.setEmail(user.getEmail());
+        UserRegistrationResponse response = new UserRegistrationResponse(user.getId(), user.getEmail());
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -48,18 +46,28 @@ public class AuthController {
 
     @PostMapping("/login")
     public UserLoginResponse login(@RequestBody UserLoginDTO dto, HttpServletResponse response) {
-        return authService.login(dto, response);
+        User user = authService.login(dto);
+
+        authService.setTokens(user, response);
+
+        return new UserLoginResponse(user.getId(), user.getEmail(), user.isHasCompletedOnboarding());
     }
 
     @PostMapping("/refresh")
-    public RefreshTokenResponse refresh(@CookieValue(value = "refresh-jwt", required = false) String refreshToken,
+    public RefreshTokenResponse refresh(
+            @CookieValue(value = "refresh-jwt", required = false) String refreshToken,
             HttpServletResponse response) {
-        return authService.refreshToken(refreshToken, response);
+
+        User user = authService.refreshUserFromToken(refreshToken);
+
+        authService.setTokens(user, response);
+
+        return new RefreshTokenResponse(user.getId(), user.getEmail());
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        authService.logout(response);
+        authService.clearTokens(response);
         return ResponseEntity.noContent().build();
     }
 }

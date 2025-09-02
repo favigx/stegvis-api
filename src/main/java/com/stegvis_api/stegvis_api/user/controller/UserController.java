@@ -1,17 +1,16 @@
 package com.stegvis_api.stegvis_api.user.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
 import com.stegvis_api.stegvis_api.user.dto.GetUserPreferenceResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserPreferenceResponse;
-import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
@@ -19,19 +18,18 @@ import com.stegvis_api.stegvis_api.user.service.UserService;
 @RequestMapping("/api/user")
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @PreAuthorize("#userId == principal.id")
-    @PutMapping("/{id}/preferences")
+    @PutMapping("/preferences")
     public ResponseEntity<UserPreferenceResponse> updateUserPreferences(
-            @PathVariable("id") String userId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody UserPreference userPreference) {
 
-        User updatedUser = userService.setUserPreferences(userId, userPreference);
+        var updatedUser = userService.setUserPreferences(userPrincipal.getId(), userPreference);
 
         UserPreferenceResponse response = UserPreferenceResponse.builder()
                 .userId(updatedUser.getId())
@@ -41,15 +39,14 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("#userId == principal.id")
-    @GetMapping("/{id}/preferences")
+    @GetMapping("/preferences")
     public ResponseEntity<GetUserPreferenceResponse> getUserPreferences(
-            @PathVariable("id") String userId) {
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        UserPreference userPreference = userService.getUserPreferences(userId);
+        UserPreference userPreference = userService.getUserPreferences(userPrincipal.getId());
 
         GetUserPreferenceResponse response = GetUserPreferenceResponse.builder()
-                .userId(userId)
+                .userId(userPrincipal.getId())
                 .userPreference(userPreference)
                 .build();
 

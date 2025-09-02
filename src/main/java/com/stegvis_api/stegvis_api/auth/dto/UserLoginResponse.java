@@ -1,17 +1,13 @@
 package com.stegvis_api.stegvis_api.auth.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class UserLoginResponse {
 
-    private String id;
-    private String email;
-    private boolean hasCompletedOnboarding;
+    private final String id;
+    private final String email;
+    private final boolean hasCompletedOnboarding;
 }

@@ -1,8 +1,6 @@
 package com.stegvis_api.stegvis_api.auth.service;
 
-import com.stegvis_api.stegvis_api.auth.dto.RefreshTokenResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginDTO;
-import com.stegvis_api.stegvis_api.auth.dto.UserLoginResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationDTO;
 import com.stegvis_api.stegvis_api.exception.type.AuthenticationException;
 import com.stegvis_api.stegvis_api.exception.type.UserAlreadyExistsException;
@@ -46,52 +44,38 @@ public class AuthService {
         return userService.saveUser(user);
     }
 
-    public UserLoginResponse login(UserLoginDTO dto, HttpServletResponse response) {
+    public User login(UserLoginDTO dto) {
         User user = userService.getUserByEmail(dto.getEmail());
         if (user == null || !passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new AuthenticationException("Ogiltlig e-post eller lösenord");
         }
-
-        String accessToken = jwtTokenService.generateToken(user.getId());
-        String refreshToken = jwtRefreshTokenService.generateToken(user.getId());
-
-        jwtTokenService.setJwtCookie(response, accessToken);
-        jwtRefreshTokenService.setRefreshCookie(response, refreshToken);
-
-        return new UserLoginResponse(user.getId(), user.getEmail(), user.isHasCompletedOnboarding());
+        return user;
     }
 
-    public RefreshTokenResponse refreshToken(String refreshToken, HttpServletResponse response) {
+    public User refreshUserFromToken(String refreshToken) {
         if (refreshToken == null) {
-            throw new AuthenticationException("Refresh token is missing");
+            throw new AuthenticationException("Refresh token saknas");
         }
 
         String userId;
         try {
             userId = jwtRefreshTokenService.validateAndGetUserId(refreshToken);
         } catch (AuthenticationException e) {
-            jwtTokenService.clearJwtCookie(response);
-            jwtRefreshTokenService.clearRefreshCookie(response);
-            throw new AuthenticationException("Refresh token is invalid or expired");
+            throw new AuthenticationException("Refresh token är ogiltig eller har gått ut");
         }
 
-        User user = userService.getUserById(userId);
-        if (user == null) {
-            jwtTokenService.clearJwtCookie(response);
-            jwtRefreshTokenService.clearRefreshCookie(response);
-            throw new AuthenticationException("Invalid refresh token");
-        }
-
-        String newAccessToken = jwtTokenService.generateToken(userId);
-        jwtTokenService.setJwtCookie(response, newAccessToken);
-
-        String newRefreshToken = jwtRefreshTokenService.generateToken(userId);
-        jwtRefreshTokenService.setRefreshCookie(response, newRefreshToken);
-
-        return new RefreshTokenResponse(user.getId(), user.getEmail());
+        return userService.getUserByIdOrThrow(userId);
     }
 
-    public void logout(HttpServletResponse response) {
+    public void setTokens(User user, HttpServletResponse response) {
+        String newAccessToken = jwtTokenService.generateToken(user.getId());
+        String newRefreshToken = jwtRefreshTokenService.generateToken(user.getId());
+
+        jwtTokenService.setJwtCookie(response, newAccessToken);
+        jwtRefreshTokenService.setRefreshCookie(response, newRefreshToken);
+    }
+
+    public void clearTokens(HttpServletResponse response) {
         jwtTokenService.clearJwtCookie(response);
         jwtRefreshTokenService.clearRefreshCookie(response);
     }
