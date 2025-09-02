@@ -1,8 +1,7 @@
 package com.stegvis_api.stegvis_api.user.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
 import com.stegvis_api.stegvis_api.user.dto.GetUserPreferenceResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserPreferenceResponse;
 import com.stegvis_api.stegvis_api.user.model.User;
@@ -27,15 +25,11 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PreAuthorize("#userId == principal.id")
     @PutMapping("/{id}/preferences")
     public ResponseEntity<UserPreferenceResponse> updateUserPreferences(
             @PathVariable("id") String userId,
-            @RequestBody UserPreference userPreference,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-
-        if (!userId.equals(userPrincipal.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+            @RequestBody UserPreference userPreference) {
 
         User updatedUser = userService.setUserPreferences(userId, userPreference);
 
@@ -47,14 +41,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("#userId == principal.id")
     @GetMapping("/{id}/preferences")
     public ResponseEntity<GetUserPreferenceResponse> getUserPreferences(
-            @PathVariable("id") String userId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-
-        if (!userId.equals(userPrincipal.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+            @PathVariable("id") String userId) {
 
         UserPreference userPreference = userService.getUserPreferences(userId);
 

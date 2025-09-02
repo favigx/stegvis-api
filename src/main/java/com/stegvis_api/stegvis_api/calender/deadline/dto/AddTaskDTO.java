@@ -1,8 +1,8 @@
-package com.stegvis_api.stegvis_api.calender.dto;
+package com.stegvis_api.stegvis_api.calender.deadline.dto;
 
 import java.time.ZonedDateTime;
 
-import com.stegvis_api.stegvis_api.calender.model.enums.Type;
+import com.stegvis_api.stegvis_api.calender.deadline.model.enums.Type;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

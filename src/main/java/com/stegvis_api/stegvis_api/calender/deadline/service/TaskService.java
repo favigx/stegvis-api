@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.calender.service;
+package com.stegvis_api.stegvis_api.calender.deadline.service;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -14,12 +14,10 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import com.stegvis_api.stegvis_api.calender.dto.AddTaskDTO;
-import com.stegvis_api.stegvis_api.calender.dto.TaskDTO;
-import com.stegvis_api.stegvis_api.calender.model.Task;
-import com.stegvis_api.stegvis_api.calender.model.enums.Type;
-import com.stegvis_api.stegvis_api.exception.type.UserNotFoundException;
-import com.stegvis_api.stegvis_api.user.model.User;
+import com.stegvis_api.stegvis_api.calender.deadline.dto.AddTaskDTO;
+import com.stegvis_api.stegvis_api.calender.deadline.dto.TaskDTO;
+import com.stegvis_api.stegvis_api.calender.deadline.model.Task;
+import com.stegvis_api.stegvis_api.calender.deadline.model.enums.Type;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
 @Service
@@ -35,11 +33,7 @@ public class TaskService {
 
     public Task addToCalender(AddTaskDTO addTaskDTO, String userId) {
 
-        User dBUser = userService.getUserById(userId);
-
-        if (dBUser == null) {
-            throw new UserNotFoundException("Användaren med id:" + userId + " hittades inte");
-        }
+        userService.getUserById(userId);
 
         Instant instantDeadline = addTaskDTO.getDeadline().toInstant();
 
@@ -54,11 +48,8 @@ public class TaskService {
     }
 
     public List<TaskDTO> getAllTasksForUser(String userId) {
-        User dbUser = userService.getUserById(userId);
 
-        if (dbUser == null) {
-            throw new UserNotFoundException("Användaren med id: " + userId + " hittades inte");
-        }
+        userService.getUserById(userId);
 
         Query query = new Query();
         query.addCriteria(Criteria.where("userId").is(userId));

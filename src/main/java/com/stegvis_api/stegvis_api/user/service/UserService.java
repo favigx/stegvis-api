@@ -18,16 +18,8 @@ public class UserService {
         this.mongoOperations = mongoOperations;
     }
 
-    public User saveUser(User user) {
-        return mongoOperations.save(user);
-    }
-
     public User setUserPreferences(String userId, UserPreference userPreference) {
         User user = getUserById(userId);
-
-        if (user == null) {
-            throw new UserNotFoundException("Användare med id " + userId + " hittades inte");
-        }
 
         user.setUserPreference(userPreference);
         user.setHasCompletedOnboarding(true);
@@ -36,10 +28,6 @@ public class UserService {
 
     public UserPreference getUserPreferences(String userId) {
         User user = getUserById(userId);
-
-        if (user == null) {
-            throw new UserNotFoundException("Användare med id " + userId + " hittades inte");
-        }
 
         return user.getUserPreference();
     }
@@ -54,5 +42,17 @@ public class UserService {
         Query query = new Query();
         query.addCriteria(Criteria.where("id").is(userId));
         return mongoOperations.findOne(query, User.class);
+    }
+
+    public User getUserOrThrow(String userId) {
+        User user = getUserById(userId);
+        if (user == null) {
+            throw new UserNotFoundException("Användaren med id:" + userId + " hittades inte");
+        }
+        return user;
+    }
+
+    public User saveUser(User user) {
+        return mongoOperations.save(user);
     }
 }

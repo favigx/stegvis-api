@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.onboarding;
+package com.stegvis_api.stegvis_api.onboarding.service;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,11 +7,11 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.stegvis_api.stegvis_api.user.model.enums.userpreference.DailyGoal;
-import com.stegvis_api.stegvis_api.user.model.enums.userpreference.EducationLevel;
-import com.stegvis_api.stegvis_api.user.model.enums.userpreference.FocusDay;
-import com.stegvis_api.stegvis_api.user.model.enums.userpreference.HelpRequest;
-import com.stegvis_api.stegvis_api.user.model.enums.userpreference.Year;
+import com.stegvis_api.stegvis_api.onboarding.enums.DailyGoal;
+import com.stegvis_api.stegvis_api.onboarding.enums.EducationLevel;
+import com.stegvis_api.stegvis_api.onboarding.enums.FocusDay;
+import com.stegvis_api.stegvis_api.onboarding.enums.HelpRequest;
+import com.stegvis_api.stegvis_api.onboarding.enums.Year;
 
 @Service
 public class OnboardingService {

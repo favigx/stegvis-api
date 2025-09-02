@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.auth;
+package com.stegvis_api.stegvis_api.auth.service;
 
 import com.stegvis_api.stegvis_api.auth.dto.RefreshTokenResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginDTO;

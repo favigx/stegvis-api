@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.auth;
+package com.stegvis_api.stegvis_api.auth.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -13,7 +13,7 @@ import com.stegvis_api.stegvis_api.auth.dto.UserLoginDTO;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationDTO;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationResponse;
-
+import com.stegvis_api.stegvis_api.auth.service.AuthService;
 import com.stegvis_api.stegvis_api.user.model.User;
 
 import jakarta.servlet.http.HttpServletResponse;

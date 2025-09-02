@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.user.model.enums.userpreference;
+package com.stegvis_api.stegvis_api.onboarding.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

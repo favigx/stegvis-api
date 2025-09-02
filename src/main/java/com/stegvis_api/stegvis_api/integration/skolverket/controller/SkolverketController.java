@@ -9,18 +9,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stegvis_api.stegvis_api.integration.skolverket.client.SkolverketHttpClient;
 import com.stegvis_api.stegvis_api.integration.skolverket.dto.ProgramResponse;
 import com.stegvis_api.stegvis_api.integration.skolverket.dto.SubjectResponse;
-import com.stegvis_api.stegvis_api.integration.skolverket.service.SkolverketService;
 
 @RestController
 @RequestMapping("/api/skolverket")
 public class SkolverketController {
 
     private final SkolverketHttpClient skolverketHttpClient;
-    private final SkolverketService skolverketService;
 
-    public SkolverketController(SkolverketHttpClient skolverketHttpClient, SkolverketService skolverketService) {
+    public SkolverketController(SkolverketHttpClient skolverketHttpClient) {
         this.skolverketHttpClient = skolverketHttpClient;
-        this.skolverketService = skolverketService;
     }
 
     @GetMapping("/programs")

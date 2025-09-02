@@ -1,10 +1,8 @@
-package com.stegvis_api.stegvis_api.calender.model;
+package com.stegvis_api.stegvis_api.todolist.model;
 
 import java.time.Instant;
 
 import org.springframework.data.annotation.Id;
-
-import com.stegvis_api.stegvis_api.calender.model.enums.Type;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,15 +15,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Task {
+public class Todo {
 
     @Id
     private String id;
 
     private String userId;
-    private String subject;
-    private Type type;
-    private Instant deadline;
-    private long daysLeft;
-    private boolean pastDue;
+    private String todo;
+    private Instant dateTimeCreated;
 }

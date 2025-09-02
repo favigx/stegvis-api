@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.calender.controller;
+package com.stegvis_api.stegvis_api.calender.deadline.controller;
 
 import java.net.URI;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.stegvis_api.stegvis_api.calender.dto.AddTaskDTO;
-import com.stegvis_api.stegvis_api.calender.dto.AddTaskResponse;
-import com.stegvis_api.stegvis_api.calender.dto.TaskDTO;
-import com.stegvis_api.stegvis_api.calender.model.Task;
-import com.stegvis_api.stegvis_api.calender.service.TaskService;
+import com.stegvis_api.stegvis_api.calender.deadline.dto.AddTaskDTO;
+import com.stegvis_api.stegvis_api.calender.deadline.dto.AddTaskResponse;
+import com.stegvis_api.stegvis_api.calender.deadline.dto.TaskDTO;
+import com.stegvis_api.stegvis_api.calender.deadline.model.Task;
+import com.stegvis_api.stegvis_api.calender.deadline.service.TaskService;
 import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
 
 @RestController
@@ -32,17 +33,12 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-    @PostMapping("/{userId}")
+    @PostMapping
     public ResponseEntity<AddTaskResponse> addTaskToCalender(
             @RequestBody AddTaskDTO addTaskDTO,
-            @PathVariable String userId,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        if (!userId.equals(userPrincipal.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        Task task = taskService.addToCalender(addTaskDTO, userId);
+        Task task = taskService.addToCalender(addTaskDTO, userPrincipal.getId());
 
         long daysLeft = taskService.calculateDaysLeft(task.getDeadline());
 
@@ -64,14 +60,10 @@ public class TaskController {
         return ResponseEntity.created(location).body(response);
     }
 
+    @PreAuthorize("#userId == principal.id")
     @GetMapping("/{userId}")
     public ResponseEntity<List<TaskDTO>> getTasksForUser(
-            @PathVariable String userId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-
-        if (!userId.equals(userPrincipal.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+            @PathVariable String userId) {
 
         List<TaskDTO> tasks = taskService.getAllTasksForUser(userId);
         return ResponseEntity.ok(tasks);

@@ -1,6 +1,6 @@
-package com.stegvis_api.stegvis_api.calender.dto;
+package com.stegvis_api.stegvis_api.calender.deadline.dto;
 
-import com.stegvis_api.stegvis_api.calender.model.enums.Type;
+import com.stegvis_api.stegvis_api.calender.deadline.model.enums.Type;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,9 +13,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddTaskResponse {
-
-    private String taskId;
+public class TaskDTO {
+    private String id;
     private String subject;
     private Type type;
     private String deadline;

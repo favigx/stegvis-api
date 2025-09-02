@@ -26,7 +26,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/api/auth/logout").authenticated()
                         .requestMatchers("/api/calender/task/**").authenticated()
-                        // .requestMatchers("/api/onboarding/**").authenticated()
+                        .requestMatchers("/api/calender/todo/**").authenticated()
+                        .requestMatchers("/api/onboarding/**").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
