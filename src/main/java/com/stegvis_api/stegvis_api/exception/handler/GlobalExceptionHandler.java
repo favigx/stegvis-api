@@ -11,29 +11,23 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.stegvis_api.stegvis_api.exception.dto.ErrorResponse;
 import com.stegvis_api.stegvis_api.exception.type.AuthenticationException;
 import com.stegvis_api.stegvis_api.exception.type.Generic;
-import com.stegvis_api.stegvis_api.exception.type.TodoNotFoundException;
-import com.stegvis_api.stegvis_api.exception.type.UserAlreadyExistsException;
-import com.stegvis_api.stegvis_api.exception.type.UserNotFoundException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import com.stegvis_api.stegvis_api.exception.type.ResourceAlreadyExistsException;
+import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUserAlreadyExists(UserAlreadyExistsException ex) {
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUserAlreadyExists(ResourceAlreadyExistsException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage()));
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
-    }
-
-    @ExceptionHandler(TodoNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleTodoNotFound(TodoNotFoundException ex) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(ResourceNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
@@ -44,6 +38,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Otillåten åtkomst"));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Ogiltig JSON input"));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(new ErrorResponse(HttpStatus.METHOD_NOT_ALLOWED.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(Generic.class)
@@ -65,21 +87,4 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), firstErrorMessage);
         return ResponseEntity.badRequest().body(errorResponse);
     }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Otillåten åtkomst"));
-    }
-
-    // @ExceptionHandler(Exception.class)
-    // public ResponseEntity<Map<String, Object>> handleAllExceptions(Exception ex)
-    // {
-    // Map<String, Object> errorResponse = Map.of(
-    // "timestamp", LocalDateTime.now(),
-    // "message", ex.getMessage(),
-    // "status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-    // return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    // }
 }

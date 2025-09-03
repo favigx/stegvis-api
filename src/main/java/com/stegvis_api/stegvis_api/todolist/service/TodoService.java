@@ -3,24 +3,22 @@ package com.stegvis_api.stegvis_api.todolist.service;
 import java.time.Instant;
 import java.util.List;
 
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import com.stegvis_api.stegvis_api.exception.type.TodoNotFoundException;
+import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.todolist.dto.AddTodoDTO;
 import com.stegvis_api.stegvis_api.todolist.model.Todo;
+import com.stegvis_api.stegvis_api.repository.TodoRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
 @Service
 public class TodoService {
 
-    private final MongoOperations mongoOperations;
+    private final TodoRepository todoRepository;
     private final UserService userService;
 
-    public TodoService(MongoOperations mongoOperations, UserService userService) {
-        this.mongoOperations = mongoOperations;
+    public TodoService(TodoRepository todoRepository, UserService userService) {
+        this.todoRepository = todoRepository;
         this.userService = userService;
     }
 
@@ -33,40 +31,22 @@ public class TodoService {
                 .dateTimeCreated(Instant.now())
                 .build();
 
-        return saveTodo(todo);
+        return todoRepository.save(todo);
     }
 
     public List<Todo> getAllTodosForUser(String userId) {
         userService.getUserByIdOrThrow(userId);
-
-        Query query = new Query();
-        query.addCriteria(Criteria.where("userId").is(userId));
-
-        return mongoOperations.find(query, Todo.class);
+        return todoRepository.findByUserId(userId);
     }
 
     public Todo deleteTodoById(String todoId, String userId) {
         userService.getUserByIdOrThrow(userId);
 
-        Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(todoId)
-                .and("userId").is(userId));
+        Todo todo = todoRepository.findByIdAndUserId(todoId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Todo med id %s hittades inte för användare %s", todoId, userId)));
 
-        Todo todo = mongoOperations.findOne(query, Todo.class);
-        if (todo == null) {
-            throw new TodoNotFoundException(
-                    String.format("Todo med id %s hittades inte för användare %s", todoId, userId));
-        }
-
-        deleteTodo(todo);
+        todoRepository.delete(todo);
         return todo;
-    }
-
-    public Todo saveTodo(Todo todo) {
-        return mongoOperations.save(todo);
-    }
-
-    public void deleteTodo(Todo todo) {
-        mongoOperations.remove(todo);
     }
 }

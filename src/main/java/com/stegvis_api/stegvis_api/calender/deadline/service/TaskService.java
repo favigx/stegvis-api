@@ -9,24 +9,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.stegvis_api.stegvis_api.calender.deadline.dto.AddTaskDTO;
 import com.stegvis_api.stegvis_api.calender.deadline.model.Task;
 import com.stegvis_api.stegvis_api.calender.deadline.model.enums.Type;
+import com.stegvis_api.stegvis_api.repository.TaskRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
 @Service
 public class TaskService {
 
-    private final MongoOperations mongoOperations;
+    private final TaskRepository taskRepository;
     private final UserService userService;
 
-    public TaskService(MongoOperations mongoOperations, UserService userService) {
-        this.mongoOperations = mongoOperations;
+    public TaskService(TaskRepository taskRepository, UserService userService) {
+        this.taskRepository = taskRepository;
         this.userService = userService;
     }
 
@@ -42,16 +40,12 @@ public class TaskService {
                 .deadline(instantDeadline)
                 .build();
 
-        return mongoOperations.save(task);
+        return taskRepository.save(task);
     }
 
     public List<Task> getAllTasksForUser(String userId) {
         userService.getUserByIdOrThrow(userId);
-
-        Query query = new Query();
-        query.addCriteria(Criteria.where("userId").is(userId));
-
-        return mongoOperations.find(query, Task.class);
+        return taskRepository.findByUserId(userId);
     }
 
     public Map<String, Object> getTypesEnum() {

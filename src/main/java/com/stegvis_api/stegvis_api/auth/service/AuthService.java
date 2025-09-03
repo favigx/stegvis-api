@@ -3,9 +3,10 @@ package com.stegvis_api.stegvis_api.auth.service;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginDTO;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationDTO;
 import com.stegvis_api.stegvis_api.exception.type.AuthenticationException;
-import com.stegvis_api.stegvis_api.exception.type.UserAlreadyExistsException;
+import com.stegvis_api.stegvis_api.exception.type.ResourceAlreadyExistsException;
+import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
+import com.stegvis_api.stegvis_api.repository.UserRepository;
 import com.stegvis_api.stegvis_api.user.model.User;
-import com.stegvis_api.stegvis_api.user.service.UserService;
 import com.stegvis_api.stegvis_api.config.security.jwt.JwtTokenService;
 import com.stegvis_api.stegvis_api.config.security.jwt.JwtRefreshTokenService;
 
@@ -17,36 +18,40 @@ import jakarta.servlet.http.HttpServletResponse;
 @Service
 public class AuthService {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
     private final JwtRefreshTokenService jwtRefreshTokenService;
 
-    public AuthService(UserService userService,
+    public AuthService(UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtTokenService jwtTokenService,
             JwtRefreshTokenService jwtRefreshTokenService) {
-        this.userService = userService;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenService = jwtTokenService;
         this.jwtRefreshTokenService = jwtRefreshTokenService;
     }
 
     public User register(UserRegistrationDTO dto) {
-        if (userService.getUserByEmail(dto.getEmail()) != null) {
-            throw new UserAlreadyExistsException("E-posten är redan kopplad till ett konto");
-        }
+        userRepository.findByEmail(dto.getEmail())
+                .ifPresent(user -> {
+                    throw new ResourceAlreadyExistsException(
+                            "E-posten är redan kopplad till ett konto");
+                });
 
         User user = new User();
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        return userService.saveUser(user);
+        return userRepository.save(user);
     }
 
     public User login(UserLoginDTO dto) {
-        User user = userService.getUserByEmail(dto.getEmail());
-        if (user == null || !passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new AuthenticationException("Ogiltlig e-post eller lösenord"));
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new AuthenticationException("Ogiltlig e-post eller lösenord");
         }
         return user;
@@ -64,7 +69,8 @@ public class AuthService {
             throw new AuthenticationException("Refresh token är ogiltig eller har gått ut");
         }
 
-        return userService.getUserByIdOrThrow(userId);
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Användaren med id " + userId + " hittades inte"));
     }
 
     public void setTokens(User user, HttpServletResponse response) {
