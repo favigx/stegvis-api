@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,7 +25,9 @@ import com.stegvis_api.stegvis_api.notes.dto.DeleteNoteResponse;
 import com.stegvis_api.stegvis_api.notes.dto.EditNoteDTO;
 import com.stegvis_api.stegvis_api.notes.dto.EditNoteResponse;
 import com.stegvis_api.stegvis_api.notes.dto.NoteDTO;
+import com.stegvis_api.stegvis_api.notes.dto.NoteFilterDTO;
 import com.stegvis_api.stegvis_api.notes.model.Note;
+import com.stegvis_api.stegvis_api.notes.service.NoteFilterService;
 import com.stegvis_api.stegvis_api.notes.service.NoteService;
 
 @RestController
@@ -31,9 +35,11 @@ import com.stegvis_api.stegvis_api.notes.service.NoteService;
 public class NoteController {
 
     private final NoteService noteService;
+    private final NoteFilterService noteFilterService;
 
-    public NoteController(NoteService noteService) {
+    public NoteController(NoteService noteService, NoteFilterService noteFilterService) {
         this.noteService = noteService;
+        this.noteFilterService = noteFilterService;
     }
 
     @PostMapping
@@ -90,6 +96,32 @@ public class NoteController {
                         .note(note.getNote())
                         .subject(note.getSubject())
                         .dateTimeCreated(note.getDateTimeCreated().toString())
+                        .build())
+                .toList();
+
+        return ResponseEntity.ok(dtoList);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<NoteDTO>> filterNotes(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(required = false) String subject,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant toDate,
+            @RequestParam(defaultValue = "date") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending) {
+
+        NoteFilterDTO filterDTO = new NoteFilterDTO(subject, fromDate, toDate, sortBy, ascending);
+        List<Note> notes = noteFilterService.filterNotes(userPrincipal.getId(), filterDTO);
+
+        List<NoteDTO> dtoList = notes.stream()
+                .map(note -> NoteDTO.builder()
+                        .id(note.getId())
+                        .note(note.getNote())
+                        .subject(note.getSubject())
+                        .dateTimeCreated(note.getDateTimeCreated().toString())
+                        .dateTimeUpdated(
+                                note.getDateTimeUpdated() != null ? note.getDateTimeUpdated().toString() : null)
                         .build())
                 .toList();
 
