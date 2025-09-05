@@ -1,7 +1,5 @@
 package com.stegvis_api.stegvis_api.notes.dto;
 
-import java.time.ZonedDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,5 +13,4 @@ public class AddNoteDTO {
 
     private String note;
     private String subject;
-    private ZonedDateTime dateTimeCreated;
 }
