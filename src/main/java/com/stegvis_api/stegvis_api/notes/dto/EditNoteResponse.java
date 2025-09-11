@@ -11,6 +11,5 @@ public class EditNoteResponse {
     private final String id;
     private final String note;
     private final String subject;
-    private final String dateTimeCreated;
-    private final String dateTimeUpdated;
+    private final String dateTime;
 }

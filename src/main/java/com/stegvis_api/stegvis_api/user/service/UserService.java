@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.repository.UserRepository;
+import com.stegvis_api.stegvis_api.user.dto.AddUserPreferenceOnboardingDTO;
 import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
 
@@ -16,13 +17,23 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User setUserPreferences(String userId, UserPreference userPreference) {
+    public UserPreference setUserPreferences(String userId, AddUserPreferenceOnboardingDTO dto) {
         User user = getUserByIdOrThrow(userId);
 
-        user.setUserPreference(userPreference);
+        UserPreference preference = UserPreference.builder()
+                .educationLevel(dto.getEducationLevel())
+                .fieldOfStudy(dto.getFieldOfStudy())
+                .orientation(dto.getOrientation())
+                .year(dto.getYear())
+                .subjects(dto.getSubjects())
+                .build();
+
+        user.setUserPreference(preference);
         user.setHasCompletedOnboarding(true);
 
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        return preference;
     }
 
     public UserPreference getUserPreferences(String userId) {

@@ -5,15 +5,25 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRegistrationDTO {
+
+    @NotBlank(message = "Förnamn får inte vara tomt")
+    @NotNull(message = "Förnamn får inte vara null")
+    private String fName;
+
+    @NotBlank(message = "Efternamn får inte vara tomt")
+    @NotNull(message = "Efternamn får inte vara null")
+    private String lName;
 
     @Email(message = "Ogiltig e-postadress")
     @NotBlank(message = "E-post får inte vara tom")

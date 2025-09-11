@@ -34,114 +34,135 @@ import com.stegvis_api.stegvis_api.notes.service.NoteService;
 @RequestMapping("/api/notes")
 public class NoteController {
 
-    private final NoteService noteService;
-    private final NoteFilterService noteFilterService;
+        private final NoteService noteService;
+        private final NoteFilterService noteFilterService;
 
-    public NoteController(NoteService noteService, NoteFilterService noteFilterService) {
-        this.noteService = noteService;
-        this.noteFilterService = noteFilterService;
-    }
+        public NoteController(NoteService noteService, NoteFilterService noteFilterService) {
+                this.noteService = noteService;
+                this.noteFilterService = noteFilterService;
+        }
 
-    @PostMapping
-    public ResponseEntity<AddNoteResponse> createNote(
-            @RequestBody AddNoteDTO addNoteDTO,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        @PostMapping
+        public ResponseEntity<AddNoteResponse> createNote(
+                        @RequestBody AddNoteDTO addNoteDTO,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        Note note = noteService.createNote(addNoteDTO, userPrincipal.getId());
+                Note note = noteService.createNote(addNoteDTO, userPrincipal.getId());
 
-        AddNoteResponse response = AddNoteResponse.builder()
-                .id(note.getId())
-                .note(note.getNote())
-                .subject(note.getSubject())
-                .dateTimeCreated(note.getDateTimeCreated().toString())
-                .build();
+                AddNoteResponse response = AddNoteResponse.builder()
+                                .id(note.getId())
+                                .note(note.getNote())
+                                .subject(note.getSubject())
+                                .dateTime(note.getDateTime().toString())
+                                .build();
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(note.getId())
-                .toUri();
+                URI location = ServletUriComponentsBuilder
+                                .fromCurrentRequest()
+                                .path("/{id}")
+                                .buildAndExpand(note.getId())
+                                .toUri();
 
-        return ResponseEntity.created(location).body(response);
-    }
+                return ResponseEntity.created(location).body(response);
+        }
 
-    @PutMapping("/{noteId}")
-    public ResponseEntity<EditNoteResponse> editNote(
-            @PathVariable String noteId,
-            @RequestBody EditNoteDTO editNoteDTO,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        @PutMapping("/{noteId}")
+        public ResponseEntity<EditNoteResponse> editNote(
+                        @PathVariable String noteId,
+                        @RequestBody EditNoteDTO editNoteDTO,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        Note updatedNote = noteService.editNote(noteId, editNoteDTO, userPrincipal.getId());
+                Note updatedNote = noteService.editNote(noteId, editNoteDTO, userPrincipal.getId());
 
-        EditNoteResponse response = EditNoteResponse.builder()
-                .id(updatedNote.getId())
-                .note(updatedNote.getNote())
-                .subject(updatedNote.getSubject())
-                .dateTimeCreated(updatedNote.getDateTimeCreated().toString())
-                .dateTimeUpdated(updatedNote.getDateTimeUpdated().toString())
-                .build();
+                EditNoteResponse response = EditNoteResponse.builder()
+                                .id(updatedNote.getId())
+                                .note(updatedNote.getNote())
+                                .subject(updatedNote.getSubject())
+                                .dateTime(updatedNote.getDateTime().toString())
+                                .build();
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @GetMapping
-    public ResponseEntity<List<NoteDTO>> getUserNotes(
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        @GetMapping("/{noteId}")
+        public ResponseEntity<NoteDTO> getNoteById(
+                        @PathVariable String noteId,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        List<Note> notes = noteService.getAllNotesForUser(userPrincipal.getId());
+                Note note = noteService.getNoteById(userPrincipal.getId(), noteId);
 
-        List<NoteDTO> dtoList = notes.stream()
-                .map(note -> NoteDTO.builder()
-                        .id(note.getId())
-                        .note(note.getNote())
-                        .subject(note.getSubject())
-                        .dateTimeCreated(note.getDateTimeCreated().toString())
-                        .build())
-                .toList();
+                NoteDTO response = NoteDTO.builder()
+                                .id(note.getId())
+                                .note(note.getNote())
+                                .subject(note.getSubject())
+                                .dateTime(note.getDateTime().toString())
+                                .build();
 
-        return ResponseEntity.ok(dtoList);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @GetMapping("/filter")
-    public ResponseEntity<List<NoteDTO>> filterNotes(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestParam(required = false) String subject,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant fromDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant toDate,
-            @RequestParam(defaultValue = "date") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending) {
+        @GetMapping
+        public ResponseEntity<List<NoteDTO>> getUserNotes(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        NoteFilterDTO filterDTO = new NoteFilterDTO(subject, fromDate, toDate, sortBy, ascending);
-        List<Note> notes = noteFilterService.filterNotes(userPrincipal.getId(), filterDTO);
+                List<Note> notes = noteService.getAllNotesForUser(userPrincipal.getId());
 
-        List<NoteDTO> dtoList = notes.stream()
-                .map(note -> NoteDTO.builder()
-                        .id(note.getId())
-                        .note(note.getNote())
-                        .subject(note.getSubject())
-                        .dateTimeCreated(note.getDateTimeCreated().toString())
-                        .dateTimeUpdated(
-                                note.getDateTimeUpdated() != null ? note.getDateTimeUpdated().toString() : null)
-                        .build())
-                .toList();
+                List<NoteDTO> dtoList = notes.stream()
+                                .map(note -> NoteDTO.builder()
+                                                .id(note.getId())
+                                                .note(note.getNote())
+                                                .subject(note.getSubject())
+                                                .dateTime(note.getDateTime().toString())
+                                                .build())
+                                .toList();
 
-        return ResponseEntity.ok(dtoList);
-    }
+                return ResponseEntity.ok(dtoList);
+        }
 
-    @DeleteMapping("/{noteId}")
-    public ResponseEntity<DeleteNoteResponse> deleteNote(
-            @PathVariable String noteId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        @GetMapping("/filter")
+        public ResponseEntity<List<NoteDTO>> filterNotes(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestParam(required = false) String subject,
+                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant fromDate,
+                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant toDate,
+                        @RequestParam(defaultValue = "false") boolean ascending) {
 
-        Note deletedNote = noteService.deleteNoteById(noteId, userPrincipal.getId());
+                NoteFilterDTO filterDTO = new NoteFilterDTO(subject, fromDate, toDate, ascending);
+                List<Note> notes = noteFilterService.filterNotes(userPrincipal.getId(), filterDTO);
 
-        DeleteNoteResponse response = DeleteNoteResponse.builder()
-                .id(deletedNote.getId())
-                .note(deletedNote.getNote())
-                .deletedAt(Instant.now().toString())
-                .message("Note har raderats framgångsrikt.")
-                .build();
+                List<NoteDTO> dtoList = notes.stream()
+                                .map(note -> NoteDTO.builder()
+                                                .id(note.getId())
+                                                .note(note.getNote())
+                                                .subject(note.getSubject())
+                                                .dateTime(note.getDateTime().toString())
+                                                .build())
+                                .toList();
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(dtoList);
+        }
+
+        @DeleteMapping("/{noteId}")
+        public ResponseEntity<DeleteNoteResponse> deleteNote(
+                        @PathVariable String noteId,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+                Note deletedNote = noteService.deleteNoteById(noteId, userPrincipal.getId());
+
+                DeleteNoteResponse response = DeleteNoteResponse.builder()
+                                .id(deletedNote.getId())
+                                .note(deletedNote.getNote())
+                                .deletedAt(Instant.now().toString())
+                                .message("Note har raderats framgångsrikt.")
+                                .build();
+
+                return ResponseEntity.ok(response);
+        }
+
+        @GetMapping("/count")
+        public ResponseEntity<Long> countUserNotes(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+                long count = noteService.countNotesByUserId(userPrincipal.getId());
+
+                return ResponseEntity.ok(count);
+        }
+
 }

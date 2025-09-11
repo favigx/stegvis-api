@@ -30,7 +30,7 @@ public class NoteService {
                 .userId(userId)
                 .note(noteDto.getNote())
                 .subject(noteDto.getSubject())
-                .dateTimeCreated(Instant.now())
+                .dateTime(Instant.now())
                 .build();
 
         return noteRepository.save(note);
@@ -41,15 +41,21 @@ public class NoteService {
 
         Note note = noteRepository.findByIdAndUserId(noteId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Note med id %s hittades inte för användare %s", noteId, userId)));
+                        ("Note hittades inte för användare")));
 
         Note updatedNote = note.toBuilder()
                 .note(editDto.getNote() != null ? editDto.getNote() : note.getNote())
                 .subject(editDto.getSubject() != null ? editDto.getSubject() : note.getSubject())
-                .dateTimeUpdated(Instant.now())
+                .dateTime(Instant.now())
                 .build();
 
         return noteRepository.save(updatedNote);
+    }
+
+    public Note getNoteById(String userId, String noteId) {
+        userService.getUserByIdOrThrow(userId);
+        return noteRepository.findByIdAndUserId(noteId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Note not found"));
     }
 
     public List<Note> getAllNotesForUser(String userId) {
@@ -62,9 +68,15 @@ public class NoteService {
 
         Note note = noteRepository.findByIdAndUserId(noteId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Note med id %s hittades inte för användare %s", noteId, userId)));
+                        ("Note hittades inte för användare")));
 
         noteRepository.delete(note);
         return note;
+    }
+
+    public long countNotesByUserId(String userId) {
+        userService.getUserByIdOrThrow(userId);
+
+        return noteRepository.countByUserId(userId);
     }
 }

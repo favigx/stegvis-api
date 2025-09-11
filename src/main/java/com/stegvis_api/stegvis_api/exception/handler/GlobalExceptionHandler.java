@@ -1,5 +1,7 @@
 package com.stegvis_api.stegvis_api.exception.handler;
 
+import java.io.IOException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,6 +17,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import com.stegvis_api.stegvis_api.exception.type.ResourceAlreadyExistsException;
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
+import com.stripe.exception.StripeException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -86,5 +89,17 @@ public class GlobalExceptionHandler {
 
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), firstErrorMessage);
         return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(StripeException.class)
+    public ResponseEntity<String> handleStripeException(StripeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body("Stripe error: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<String> handleIOException(IOException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("IO error: " + ex.getMessage());
     }
 }

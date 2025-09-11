@@ -40,9 +40,12 @@ public class AuthService {
                             "E-posten är redan kopplad till ett konto");
                 });
 
-        User user = new User();
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        User user = User.builder()
+                .fName(dto.getFName())
+                .lName(dto.getLName())
+                .email(dto.getEmail())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .build();
 
         return userRepository.save(user);
     }

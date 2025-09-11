@@ -23,6 +23,5 @@ public class Note {
     private String userId;
     private String note;
     private String subject;
-    private Instant dateTimeCreated;
-    private Instant dateTimeUpdated;
+    private Instant dateTime;
 }

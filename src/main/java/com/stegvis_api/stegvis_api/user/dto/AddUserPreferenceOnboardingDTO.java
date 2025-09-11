@@ -1,12 +1,8 @@
-package com.stegvis_api.stegvis_api.user.model;
+package com.stegvis_api.stegvis_api.user.dto;
 
 import java.util.List;
 
-import com.stegvis_api.stegvis_api.onboarding.enums.DailyGoal;
 import com.stegvis_api.stegvis_api.onboarding.enums.EducationLevel;
-import com.stegvis_api.stegvis_api.onboarding.enums.FocusDay;
-import com.stegvis_api.stegvis_api.onboarding.enums.Grades;
-import com.stegvis_api.stegvis_api.onboarding.enums.HelpRequest;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
 
 import lombok.AllArgsConstructor;
@@ -20,15 +16,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserPreference {
+public class AddUserPreferenceOnboardingDTO {
 
     private EducationLevel educationLevel;
     private String fieldOfStudy;
     private String orientation;
     private Year year;
-    private List<Grades> grades;
     private List<String> subjects;
-    private List<FocusDay> focusDays;
-    private DailyGoal dailyGoal;
-    private List<HelpRequest> helpRequests;
 }

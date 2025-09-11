@@ -33,7 +33,12 @@ public class AuthController {
     public ResponseEntity<UserRegistrationResponse> registerUser(@RequestBody UserRegistrationDTO dto) {
         User user = authService.register(dto);
 
-        UserRegistrationResponse response = new UserRegistrationResponse(user.getId(), user.getEmail());
+        UserRegistrationResponse response = UserRegistrationResponse.builder()
+                .id(user.getId())
+                .fName(user.getFName())
+                .lName(user.getLName())
+                .email(user.getEmail())
+                .build();
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -45,16 +50,22 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public UserLoginResponse login(@RequestBody UserLoginDTO dto, HttpServletResponse response) {
+    public ResponseEntity<UserLoginResponse> login(@RequestBody UserLoginDTO dto, HttpServletResponse response) {
         User user = authService.login(dto);
 
         authService.setTokens(user, response);
 
-        return new UserLoginResponse(user.getId(), user.getEmail(), user.isHasCompletedOnboarding());
+        UserLoginResponse responseDto = UserLoginResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .hasCompletedOnboarding(user.isHasCompletedOnboarding())
+                .build();
+
+        return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping("/refresh")
-    public RefreshTokenResponse refresh(
+    public ResponseEntity<RefreshTokenResponse> refresh(
             @CookieValue(value = "refresh-jwt", required = false) String refreshToken,
             HttpServletResponse response) {
 
@@ -62,7 +73,12 @@ public class AuthController {
 
         authService.setTokens(user, response);
 
-        return new RefreshTokenResponse(user.getId(), user.getEmail());
+        RefreshTokenResponse responseDto = RefreshTokenResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .build();
+
+        return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping("/logout")

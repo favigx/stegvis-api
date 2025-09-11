@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
+import com.stegvis_api.stegvis_api.user.dto.AddUserPreferenceOnboardingDTO;
 import com.stegvis_api.stegvis_api.user.dto.GetUserPreferenceResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserPreferenceResponse;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
@@ -27,13 +28,13 @@ public class UserController {
     @PutMapping("/preferences")
     public ResponseEntity<UserPreferenceResponse> updateUserPreferences(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody UserPreference userPreference) {
+            @RequestBody AddUserPreferenceOnboardingDTO preferenceDTO) {
 
-        var updatedUser = userService.setUserPreferences(userPrincipal.getId(), userPreference);
+        UserPreference updatedPreference = userService.setUserPreferences(userPrincipal.getId(), preferenceDTO);
 
         UserPreferenceResponse response = UserPreferenceResponse.builder()
-                .userId(updatedUser.getId())
-                .userPreference(updatedUser.getUserPreference())
+                .userId(userPrincipal.getId())
+                .userPreference(updatedPreference)
                 .build();
 
         return ResponseEntity.ok(response);

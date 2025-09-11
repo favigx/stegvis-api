@@ -1,5 +1,6 @@
 package com.stegvis_api.stegvis_api.notes.service;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
@@ -27,30 +28,25 @@ public class NoteFilterService {
             criteria = criteria.and("subject").regex(filterDTO.getSubject(), "i");
         }
 
-        if (filterDTO.getFromDate() != null) {
-            criteria = criteria.and("dateTimeCreated").gte(filterDTO.getFromDate());
-        }
-        if (filterDTO.getToDate() != null) {
-            criteria = criteria.and("dateTimeCreated").lte(filterDTO.getToDate());
+        if (filterDTO.getFromDate() != null || filterDTO.getToDate() != null) {
+            Criteria dateCriteria = Criteria.where("dateTime");
+
+            if (filterDTO.getFromDate() != null) {
+                dateCriteria = dateCriteria.gte(filterDTO.getFromDate());
+            }
+            if (filterDTO.getToDate() != null) {
+
+                Instant toInstant = filterDTO.getToDate().plusSeconds(24 * 60 * 60 - 1);
+                dateCriteria = dateCriteria.lte(toInstant);
+            }
+
+            criteria = criteria.andOperator(dateCriteria);
         }
 
         Query query = new Query(criteria);
 
         Sort.Direction direction = filterDTO.isAscending() ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-        String sortBy = filterDTO.getSortBy() != null ? filterDTO.getSortBy().toLowerCase() : "date";
-
-        switch (sortBy) {
-            case "subject":
-                query.with(Sort.by(direction, "subject"));
-                break;
-            case "dateupdated":
-                query.with(Sort.by(direction, "dateTimeUpdated"));
-                break;
-            default:
-                query.with(Sort.by(direction, "dateTimeCreated"));
-                break;
-        }
+        query.with(Sort.by(direction, "dateTime"));
 
         return mongoTemplate.find(query, Note.class);
     }

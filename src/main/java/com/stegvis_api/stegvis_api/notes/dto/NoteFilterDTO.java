@@ -15,6 +15,5 @@ public class NoteFilterDTO {
     private String subject;
     private Instant fromDate;
     private Instant toDate;
-    private String sortBy = "date";
-    private boolean ascending = true;
+    private boolean ascending = false;
 }
