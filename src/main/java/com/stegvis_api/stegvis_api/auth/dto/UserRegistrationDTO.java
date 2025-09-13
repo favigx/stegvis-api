@@ -19,11 +19,11 @@ public class UserRegistrationDTO {
 
     @NotBlank(message = "Förnamn får inte vara tomt")
     @NotNull(message = "Förnamn får inte vara null")
-    private String fName;
+    private String firstname;
 
     @NotBlank(message = "Efternamn får inte vara tomt")
     @NotNull(message = "Efternamn får inte vara null")
-    private String lName;
+    private String lastname;
 
     @Email(message = "Ogiltig e-postadress")
     @NotBlank(message = "E-post får inte vara tom")

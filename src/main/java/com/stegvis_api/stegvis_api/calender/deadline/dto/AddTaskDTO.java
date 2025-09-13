@@ -18,5 +18,4 @@ public class AddTaskDTO {
     private String subject;
     private Type type;
     private ZonedDateTime deadline;
-
 }

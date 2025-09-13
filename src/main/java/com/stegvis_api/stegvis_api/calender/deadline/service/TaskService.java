@@ -17,6 +17,9 @@ import com.stegvis_api.stegvis_api.calender.deadline.model.enums.Type;
 import com.stegvis_api.stegvis_api.repository.TaskRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class TaskService {
 
@@ -40,17 +43,22 @@ public class TaskService {
                 .deadline(instantDeadline)
                 .build();
 
-        return taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+        log.info("Task added to calendar: taskId={}, userId={}", savedTask.getId(), userId);
+        return savedTask;
     }
 
     public List<Task> getAllTasksForUser(String userId) {
         userService.getUserByIdOrThrow(userId);
-        return taskRepository.findByUserId(userId);
+        List<Task> tasks = taskRepository.findByUserId(userId);
+        log.debug("Fetched {} tasks for userId={}", tasks.size(), userId);
+        return tasks;
     }
 
     public Map<String, Object> getTypesEnum() {
         Map<String, Object> enums = new HashMap<>();
         enums.put("types", mapToTitleCase(Type.values()));
+        log.debug("Fetched task types enum");
         return enums;
     }
 
@@ -68,6 +76,8 @@ public class TaskService {
     public long calculateDaysLeft(Instant deadline) {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Stockholm"));
         ZonedDateTime deadlineZoned = deadline.atZone(ZoneId.of("Europe/Stockholm"));
-        return ChronoUnit.DAYS.between(now.toLocalDate(), deadlineZoned.toLocalDate());
+        long daysLeft = ChronoUnit.DAYS.between(now.toLocalDate(), deadlineZoned.toLocalDate());
+        log.debug("Calculated days left={} for deadline={}", daysLeft, deadline);
+        return daysLeft;
     }
 }

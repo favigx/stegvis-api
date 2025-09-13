@@ -14,6 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TaskDTO {
+
     private String id;
     private String subject;
     private Type type;

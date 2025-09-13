@@ -14,6 +14,9 @@ import com.stegvis_api.stegvis_api.onboarding.enums.Grades;
 import com.stegvis_api.stegvis_api.onboarding.enums.HelpRequest;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class OnboardingService {
 
@@ -29,6 +32,8 @@ public class OnboardingService {
                 .map(Year::getYear)
                 .toList());
         enums.put("helpRequests", mapToTitleCase(HelpRequest.values()));
+
+        log.debug("Retrieved onboarding enums: {}", enums.keySet());
         return enums;
     }
 

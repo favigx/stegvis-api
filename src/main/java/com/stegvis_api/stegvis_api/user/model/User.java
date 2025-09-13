@@ -1,6 +1,7 @@
 package com.stegvis_api.stegvis_api.user.model;
 
 import org.springframework.data.annotation.Id;
+import com.stegvis_api.stegvis_api.user.enums.Role;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,10 +19,14 @@ public class User {
     @Id
     private String id;
 
-    private String fName;
-    private String lName;
+    @Builder.Default
+    private Role role = Role.ROLE_USER;
+
+    private String firstname;
+    private String lastname;
+
     private String email;
-    private String username;
+
     private String password;
     private UserPreference userPreference;
     private boolean hasCompletedOnboarding;

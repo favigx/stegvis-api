@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import com.stegvis_api.stegvis_api.notes.dto.NoteFilterDTO;
 import com.stegvis_api.stegvis_api.notes.model.Note;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class NoteFilterService {
 
@@ -35,7 +38,6 @@ public class NoteFilterService {
                 dateCriteria = dateCriteria.gte(filterDTO.getFromDate());
             }
             if (filterDTO.getToDate() != null) {
-
                 Instant toInstant = filterDTO.getToDate().plusSeconds(24 * 60 * 60 - 1);
                 dateCriteria = dateCriteria.lte(toInstant);
             }
@@ -44,10 +46,14 @@ public class NoteFilterService {
         }
 
         Query query = new Query(criteria);
-
         Sort.Direction direction = filterDTO.isAscending() ? Sort.Direction.ASC : Sort.Direction.DESC;
         query.with(Sort.by(direction, "dateTime"));
 
-        return mongoTemplate.find(query, Note.class);
+        List<Note> results = mongoTemplate.find(query, Note.class);
+
+        log.debug("Filtered notes for userId={}, subjectFilter={}, fromDate={}, toDate={}, results={}",
+                userId, filterDTO.getSubject(), filterDTO.getFromDate(), filterDTO.getToDate(), results.size());
+
+        return results;
     }
 }

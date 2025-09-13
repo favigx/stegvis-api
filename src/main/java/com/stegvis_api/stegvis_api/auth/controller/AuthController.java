@@ -17,6 +17,8 @@ import com.stegvis_api.stegvis_api.auth.service.AuthService;
 import com.stegvis_api.stegvis_api.user.model.User;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+
 import java.net.URI;
 
 @RestController
@@ -30,14 +32,15 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserRegistrationResponse> registerUser(@RequestBody UserRegistrationDTO dto) {
+    public ResponseEntity<UserRegistrationResponse> registerUser(@Valid @RequestBody UserRegistrationDTO dto) {
         User user = authService.register(dto);
 
         UserRegistrationResponse response = UserRegistrationResponse.builder()
                 .id(user.getId())
-                .fName(user.getFName())
-                .lName(user.getLName())
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
                 .email(user.getEmail())
+                .role(user.getRole())
                 .build();
 
         URI location = ServletUriComponentsBuilder
@@ -50,7 +53,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponse> login(@RequestBody UserLoginDTO dto, HttpServletResponse response) {
+    public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginDTO dto, HttpServletResponse response) {
         User user = authService.login(dto);
 
         authService.setTokens(user, response);
