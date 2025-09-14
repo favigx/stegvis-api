@@ -8,4 +8,6 @@ import com.stegvis_api.stegvis_api.calender.deadline.model.Task;
 
 public interface TaskRepository extends MongoRepository<Task, String> {
     List<Task> findByUserId(String userId);
+
+    long deleteByUserId(String userId);
 }

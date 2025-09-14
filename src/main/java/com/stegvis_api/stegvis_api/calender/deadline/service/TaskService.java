@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.calender.deadline.dto.AddTaskDTO;
 import com.stegvis_api.stegvis_api.calender.deadline.model.Task;
@@ -31,6 +32,7 @@ public class TaskService {
         this.userService = userService;
     }
 
+    @Transactional
     public Task addToCalender(AddTaskDTO addTaskDTO, String userId) {
         userService.getUserByIdOrThrow(userId);
 

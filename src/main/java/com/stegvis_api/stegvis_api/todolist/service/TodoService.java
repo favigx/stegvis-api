@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.todolist.dto.AddTodoDTO;
@@ -25,6 +26,7 @@ public class TodoService {
         this.userService = userService;
     }
 
+    @Transactional
     public Todo createTodo(AddTodoDTO todoDto, String userId) {
         userService.getUserByIdOrThrow(userId);
 

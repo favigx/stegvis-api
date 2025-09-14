@@ -3,6 +3,7 @@ package com.stegvis_api.stegvis_api.calender.deadline.model;
 import java.time.Instant;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.stegvis_api.stegvis_api.calender.deadline.model.enums.Type;
 
@@ -17,6 +18,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Document(collection = "userTasks")
+
 public class Task {
 
     @Id

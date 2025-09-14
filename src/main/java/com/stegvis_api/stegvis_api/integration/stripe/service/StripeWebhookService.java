@@ -14,6 +14,7 @@ import com.stripe.net.Webhook;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -57,6 +58,7 @@ public class StripeWebhookService {
         }
     }
 
+    @Transactional
     private void handleCheckoutSession(Event event) {
         Session session = deserializeStripeObject(event, Session.class);
         if (session == null)
@@ -78,6 +80,7 @@ public class StripeWebhookService {
         }
     }
 
+    @Transactional
     private void handleSubscriptionDeleted(Event event) {
         Subscription subscription = deserializeStripeObject(event, Subscription.class);
         if (subscription == null)

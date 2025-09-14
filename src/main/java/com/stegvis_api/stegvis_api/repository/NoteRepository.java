@@ -17,4 +17,6 @@ public interface NoteRepository extends MongoRepository<Note, String> {
     long countByUserId(String userId);
 
     long countByUserIdAndSubject(String userId, String subject);
+
+    long deleteByUserId(String userId);
 }

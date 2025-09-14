@@ -2,10 +2,15 @@ package com.stegvis_api.stegvis_api.user.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
+import com.stegvis_api.stegvis_api.repository.NoteRepository;
+import com.stegvis_api.stegvis_api.repository.TaskRepository;
+import com.stegvis_api.stegvis_api.repository.TodoRepository;
 import com.stegvis_api.stegvis_api.repository.UserRepository;
 import com.stegvis_api.stegvis_api.user.dto.AddUserPreferenceOnboardingDTO;
+import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
 import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
 
@@ -14,11 +19,19 @@ import com.stegvis_api.stegvis_api.user.model.UserPreference;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final NoteRepository noteRepository;
+    private final TaskRepository taskRepository;
+    private final TodoRepository todoRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, NoteRepository noteRepository, TaskRepository taskRepository,
+            TodoRepository todoRepository) {
         this.userRepository = userRepository;
+        this.noteRepository = noteRepository;
+        this.taskRepository = taskRepository;
+        this.todoRepository = todoRepository;
     }
 
+    @Transactional
     public UserPreference setUserPreferences(String userId, AddUserPreferenceOnboardingDTO dto) {
         User user = getUserByIdOrThrow(userId);
 
@@ -51,5 +64,21 @@ public class UserService {
                     log.warn("User not found: id={}", userId);
                     return new ResourceNotFoundException("Användaren med id: " + userId + " hittades inte");
                 });
+    }
+
+    @Transactional
+    public DeleteUserResult deleteUser(String userId) {
+        User user = getUserByIdOrThrow(userId);
+
+        long deletedNotes = noteRepository.deleteByUserId(userId);
+        long deletedTodos = todoRepository.deleteByUserId(userId);
+        long deletedTasks = taskRepository.deleteByUserId(userId);
+
+        userRepository.delete(user);
+
+        log.info("User deleted: userId={}, deletedNotes={}, deletedTodos={}, deletedTasks={}",
+                userId, deletedNotes, deletedTodos, deletedTasks);
+
+        return new DeleteUserResult(deletedNotes, deletedTodos, deletedTasks);
     }
 }

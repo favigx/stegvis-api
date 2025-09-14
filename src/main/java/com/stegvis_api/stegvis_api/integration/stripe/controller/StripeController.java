@@ -10,24 +10,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
 import com.stegvis_api.stegvis_api.integration.stripe.dto.CheckoutSessionResponse;
-import com.stegvis_api.stegvis_api.integration.stripe.service.StripeService;
+import com.stegvis_api.stegvis_api.integration.stripe.service.StripeCheckoutService;
 import com.stripe.exception.StripeException;
 
 @RestController
 @RequestMapping("/api/stripe")
 public class StripeController {
 
-    private final StripeService stripeService;
+    private final StripeCheckoutService stripeCheckoutService;
 
-    public StripeController(StripeService stripeService) {
-        this.stripeService = stripeService;
+    public StripeController(StripeCheckoutService stripeCheckoutService) {
+        this.stripeCheckoutService = stripeCheckoutService;
     }
 
     @GetMapping("/checkoutsession")
     public ResponseEntity<CheckoutSessionResponse> createCheckoutSession(
             @AuthenticationPrincipal UserPrincipal userPrincipal) throws StripeException, IOException {
 
-        String checkoutUrl = stripeService.createCheckoutSession(userPrincipal.getId());
+        String checkoutUrl = stripeCheckoutService.createCheckoutSession(userPrincipal.getId());
 
         return ResponseEntity.ok(new CheckoutSessionResponse(checkoutUrl));
     }

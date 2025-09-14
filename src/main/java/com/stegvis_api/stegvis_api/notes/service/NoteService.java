@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteDTO;
@@ -26,6 +27,7 @@ public class NoteService {
         this.userService = userService;
     }
 
+    @Transactional
     public Note createNote(AddNoteDTO noteDto, String userId) {
         userService.getUserByIdOrThrow(userId);
 

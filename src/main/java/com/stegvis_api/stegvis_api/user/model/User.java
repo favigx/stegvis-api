@@ -1,6 +1,8 @@
 package com.stegvis_api.stegvis_api.user.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.stegvis_api.stegvis_api.user.enums.Role;
 
 import lombok.AllArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Document(collection = "users")
 public class User {
 
     @Id
