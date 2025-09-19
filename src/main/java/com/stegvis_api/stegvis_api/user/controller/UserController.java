@@ -17,7 +17,6 @@ import com.stegvis_api.stegvis_api.user.dto.DeleteUserResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
 import com.stegvis_api.stegvis_api.user.dto.GetUserPreferenceResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserPreferenceResponse;
-import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 

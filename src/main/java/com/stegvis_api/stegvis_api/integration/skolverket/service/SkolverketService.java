@@ -8,7 +8,12 @@ import org.springframework.web.client.HttpServerErrorException;
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.integration.skolverket.client.SkolverketHttpClient;
 import com.stegvis_api.stegvis_api.integration.skolverket.dto.ProgramResponse;
+import com.stegvis_api.stegvis_api.integration.skolverket.dto.SubjectCourseResponse;
+import com.stegvis_api.stegvis_api.integration.skolverket.dto.SubjectDetailResponse;
 import com.stegvis_api.stegvis_api.integration.skolverket.dto.SubjectResponse;
+import com.stegvis_api.stegvis_api.integration.skolverket.model.Course;
+import com.stegvis_api.stegvis_api.integration.skolverket.model.CourseInfo;
+import com.stegvis_api.stegvis_api.integration.skolverket.model.SubjectInfo;
 
 @Slf4j
 @Service
@@ -47,4 +52,31 @@ public class SkolverketService {
             throw new RuntimeException("Fel vid anrop till Skolverket API");
         }
     }
+
+    public SubjectCourseResponse getSubjectCourseDetails(String subjectCode, String courseCode) {
+        try {
+            SubjectDetailResponse subjectResponse = skolverketHttpClient.findSubjectByCode(subjectCode);
+            var subject = subjectResponse.getSubject();
+
+            Course course = subject.getCourses().stream()
+                    .filter(c -> c.getCode().equals(courseCode))
+                    .findFirst()
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Kurs " + courseCode + " kunde inte hittas för ämnet " + subjectCode));
+
+            return new SubjectCourseResponse(
+                    new SubjectInfo(subject.getCode(), subject.getName(), subject.getDescription(),
+                            subject.getPurpose()),
+                    new CourseInfo(course.getCode(), course.getName(), course.getDescription(),
+                            course.getCentralContent(), course.getKnowledgeRequirements()));
+
+        } catch (HttpClientErrorException.NotFound e) {
+            log.warn("Subject details not found for subjectCode={}", subjectCode);
+            throw new ResourceNotFoundException("Subjects för programkod " + subjectCode + " kunde inte hittas");
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("Error calling Skolverket API for subjectCode={}: {}", subjectCode, e.getMessage(), e);
+            throw new RuntimeException("Fel vid anrop till Skolverket API");
+        }
+    }
+
 }

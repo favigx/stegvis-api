@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
+import com.stegvis_api.stegvis_api.integration.openai.service.OpenAiNoteService;
+import com.stegvis_api.stegvis_api.integration.skolverket.dto.SubjectCourseResponse;
+import com.stegvis_api.stegvis_api.integration.skolverket.service.SkolverketService;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteDTO;
 import com.stegvis_api.stegvis_api.notes.dto.EditNoteDTO;
 import com.stegvis_api.stegvis_api.notes.model.Note;
@@ -21,10 +24,15 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
     private final UserService userService;
+    private final OpenAiNoteService openAiNoteService;
+    private final SkolverketService skolverketService;
 
-    public NoteService(NoteRepository noteRepository, UserService userService) {
+    public NoteService(NoteRepository noteRepository, UserService userService, OpenAiNoteService openAiNoteService,
+            SkolverketService skolverketService) {
         this.noteRepository = noteRepository;
         this.userService = userService;
+        this.openAiNoteService = openAiNoteService;
+        this.skolverketService = skolverketService;
     }
 
     @Transactional
@@ -100,5 +108,29 @@ public class NoteService {
         long count = noteRepository.countByUserId(userId);
         log.debug("Counted {} notes for userId={}", count, userId);
         return count;
+    }
+
+    @Transactional
+    public Note optimizeNoteWithAI(String noteId, String userId, String subjectCode, String courseCode) {
+        userService.getUserByIdOrThrow(userId);
+
+        Note note = noteRepository.findByIdAndUserId(noteId, userId)
+                .orElseThrow(() -> {
+                    log.warn("Optimize failed: noteId={} not found for userId={}", noteId, userId);
+                    return new ResourceNotFoundException("Note hittades inte för användare");
+                });
+
+        SubjectCourseResponse subjectCourse = skolverketService.getSubjectCourseDetails(subjectCode, courseCode);
+
+        String optimizedContent = openAiNoteService.generateOptimizedNote(note.getNote(), subjectCourse);
+
+        Note updatedNote = note.toBuilder()
+                .note(optimizedContent)
+                .dateTime(Instant.now())
+                .build();
+
+        Note savedNote = noteRepository.save(updatedNote);
+        log.info("Note optimized with AI for userId={}, noteId={}", userId, noteId);
+        return savedNote;
     }
 }

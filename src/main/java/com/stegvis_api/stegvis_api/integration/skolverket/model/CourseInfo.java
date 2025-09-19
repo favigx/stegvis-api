@@ -9,15 +9,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class Subject {
+@AllArgsConstructor
+public class CourseInfo {
 
     private String code;
     private String name;
-    private String points;
     private String description;
-    private String purpose;
-    private List<Course> courses;
+    private CentralContent centralContent;
+    private List<KnowledgeRequirement> knowledgeRequirements;
 
 }

@@ -165,4 +165,21 @@ public class NoteController {
                 return ResponseEntity.ok(count);
         }
 
+        @PutMapping("/{noteId}/optimize/{subjectCode}/{courseCode}")
+        public ResponseEntity<NoteDTO> optimizeNote(
+                        @PathVariable String noteId, @PathVariable String subjectCode, @PathVariable String courseCode,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+                Note optimizedNote = noteService.optimizeNoteWithAI(noteId, userPrincipal.getId(), subjectCode,
+                                courseCode);
+
+                NoteDTO response = NoteDTO.builder()
+                                .id(optimizedNote.getId())
+                                .note(optimizedNote.getNote())
+                                .subject(optimizedNote.getSubject())
+                                .dateTime(optimizedNote.getDateTime().toString())
+                                .build();
+
+                return ResponseEntity.ok(response);
+        }
 }
