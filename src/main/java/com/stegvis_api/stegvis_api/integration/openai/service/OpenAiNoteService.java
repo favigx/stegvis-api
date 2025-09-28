@@ -1,8 +1,5 @@
 package com.stegvis_api.stegvis_api.integration.openai.service;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.stegvis_api.stegvis_api.integration.openai.client.OpenAiHttpClient;
 import com.stegvis_api.stegvis_api.integration.openai.model.AiChatRequest;
 import com.stegvis_api.stegvis_api.integration.openai.model.AiChatResponse;
@@ -10,6 +7,8 @@ import com.stegvis_api.stegvis_api.integration.openai.model.AiMessage;
 import com.stegvis_api.stegvis_api.integration.skolverket.dto.SubjectCourseResponse;
 import com.stegvis_api.stegvis_api.integration.skolverket.model.CourseInfo;
 import com.stegvis_api.stegvis_api.integration.skolverket.model.SubjectInfo;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ import java.util.List;
 public class OpenAiNoteService {
 
     private final OpenAiHttpClient openAiHttpClient;
-
     @Value("${stegvis.openai.role.notes}")
     private String noteSystemPrompt;
 
@@ -25,13 +23,13 @@ public class OpenAiNoteService {
         this.openAiHttpClient = openAiHttpClient;
     }
 
-    private AiChatRequest buildNoteRequest(String model, String noteContent, SubjectCourseResponse subjectCourse) {
+    private AiChatRequest buildNoteRequest(String model, String noteContent, SubjectCourseResponse subjectCourse,
+            boolean stream) {
         SubjectInfo subject = subjectCourse.getSubject();
         CourseInfo course = subjectCourse.getCourse();
 
         String systemPrompt = noteSystemPrompt + "\n\n" +
-                "Använd följande ämnesinformation när du fördjupar anteckningen:\n"
-                +
+                "Använd följande ämnesinformation när du fördjupar anteckningen:\n" +
                 "Ämne: " + subject.getName() + "\n" +
                 "Beskrivning: " + subject.getDescription() + "\n" +
                 "Syfte: " + subject.getPurpose() + "\n\n" +
@@ -43,17 +41,20 @@ public class OpenAiNoteService {
                         .map(k -> k.getGradeStep() + ": " + k.getText())
                         .reduce((a, b) -> a + "\n" + b).orElse("");
 
-        return AiChatRequest.builder()
+        AiChatRequest request = AiChatRequest.builder()
                 .model(model)
                 .messages(List.of(
                         new AiMessage("system", systemPrompt),
                         new AiMessage("user", noteContent)))
                 .n(1)
+
                 .build();
+
+        return request;
     }
 
     public String generateOptimizedNote(String noteContent, SubjectCourseResponse subjectCourse) {
-        AiChatRequest request = buildNoteRequest("gpt-4o-mini", noteContent, subjectCourse);
+        AiChatRequest request = buildNoteRequest("gpt-4o-mini", noteContent, subjectCourse, false);
         AiChatResponse response = openAiHttpClient.createChatCompletion(request);
         return response.getChoices().get(0).getMessage().getContent();
     }
