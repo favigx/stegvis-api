@@ -1,10 +1,17 @@
 package com.stegvis_api.stegvis_api.user.service;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
+import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesDTO;
+import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
 import com.stegvis_api.stegvis_api.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.repository.TaskRepository;
 import com.stegvis_api.stegvis_api.repository.TodoRepository;
@@ -50,6 +57,35 @@ public class UserService {
 
         log.debug("Set onboarding preferences for user id={}", userId);
         return preference;
+    }
+
+    @Transactional
+    public List<SubjectGrade> setUserSubjectGrades(String userId, AddUserSubjectGradesDTO dto) {
+        User user = getUserByIdOrThrow(userId);
+
+        if (user.getSubjectGrades() == null) {
+            user.setSubjectGrades(new ArrayList<>());
+        }
+
+        for (SubjectGrade newGrade : dto.getSubjectGrades()) {
+            Optional<SubjectGrade> existing = user.getSubjectGrades().stream()
+                    .filter(sg -> sg.getSubjectName().equalsIgnoreCase(newGrade.getSubjectName()))
+                    .findFirst();
+
+            if (existing.isPresent()) {
+                SubjectGrade sg = existing.get();
+                sg.setGrade(newGrade.getGrade());
+                sg.setCoursePoints(newGrade.getCoursePoints());
+            } else {
+                user.getSubjectGrades().add(newGrade);
+            }
+        }
+
+        log.debug("Updated subject grades for user id={}", userId);
+
+        userRepository.save(user);
+
+        return user.getSubjectGrades();
     }
 
     public UserPreference getUserPreferences(String userId) {

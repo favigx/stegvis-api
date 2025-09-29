@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.stegvis_api.stegvis_api.onboarding.enums.DailyGoal;
 import com.stegvis_api.stegvis_api.onboarding.enums.EducationLevel;
 import com.stegvis_api.stegvis_api.onboarding.enums.FocusDay;
-import com.stegvis_api.stegvis_api.onboarding.enums.Grades;
 import com.stegvis_api.stegvis_api.onboarding.enums.HelpRequest;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
 
@@ -23,7 +22,6 @@ public class OnboardingService {
     public Map<String, Object> getAllEnums() {
         Map<String, Object> enums = new HashMap<>();
         enums.put("educationLevels", mapToTitleCase(EducationLevel.values()));
-        enums.put("grades", mapToTitleCase(Grades.values()));
         enums.put("focusDays", mapToTitleCase(FocusDay.values()));
         enums.put("dailyGoals", Arrays.stream(DailyGoal.values())
                 .map(DailyGoal::getMinutes)

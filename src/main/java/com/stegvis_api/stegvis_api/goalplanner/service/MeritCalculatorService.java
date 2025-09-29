@@ -1,0 +1,38 @@
+package com.stegvis_api.stegvis_api.goalplanner.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import com.stegvis_api.stegvis_api.goalplanner.enums.Grade;
+import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
+
+@Service
+public class MeritCalculatorService {
+
+    private static final Map<Grade, Double> GRADE_VALUES = Map.of(
+            Grade.A, 20.0,
+            Grade.B, 17.5,
+            Grade.C, 15.0,
+            Grade.D, 12.5,
+            Grade.E, 10.0,
+            Grade.F, 0.0);
+
+    public double calculateMeritValue(List<SubjectGrade> subjects) {
+        double totalPoints = 0;
+        double totalWeighted = 0;
+
+        for (SubjectGrade sg : subjects) {
+            double gradeValue = GRADE_VALUES.getOrDefault(sg.getGrade(), 0.0);
+            double coursePoints = sg.getCoursePoints();
+            totalPoints += coursePoints;
+            totalWeighted += gradeValue * coursePoints;
+        }
+
+        if (totalPoints == 0)
+            return 0.0;
+
+        return Math.round((totalWeighted / totalPoints) * 100.0) / 100.0;
+    }
+}

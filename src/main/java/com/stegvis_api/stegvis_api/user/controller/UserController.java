@@ -1,6 +1,7 @@
 package com.stegvis_api.stegvis_api.user.controller;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
+import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesDTO;
+import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesResponse;
+import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
 import com.stegvis_api.stegvis_api.user.dto.AddUserPreferenceOnboardingDTO;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
@@ -24,55 +28,71 @@ import com.stegvis_api.stegvis_api.user.service.UserService;
 @RequestMapping("/api/user")
 public class UserController {
 
-    private final UserService userService;
+        private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+        public UserController(UserService userService) {
+                this.userService = userService;
+        }
 
-    @PutMapping("/preferences")
-    public ResponseEntity<UserPreferenceResponse> updateUserPreferences(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody AddUserPreferenceOnboardingDTO preferenceDTO) {
+        @PutMapping("/preferences")
+        public ResponseEntity<UserPreferenceResponse> updateUserPreferences(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody AddUserPreferenceOnboardingDTO preferenceDTO) {
 
-        UserPreference updatedPreference = userService.setUserPreferences(userPrincipal.getId(), preferenceDTO);
+                UserPreference updatedPreference = userService.setUserPreferences(userPrincipal.getId(), preferenceDTO);
 
-        UserPreferenceResponse response = UserPreferenceResponse.builder()
-                .userId(userPrincipal.getId())
-                .userPreference(updatedPreference)
-                .build();
+                UserPreferenceResponse response = UserPreferenceResponse.builder()
+                                .userId(userPrincipal.getId())
+                                .userPreference(updatedPreference)
+                                .build();
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @GetMapping("/preferences")
-    public ResponseEntity<GetUserPreferenceResponse> getUserPreferences(
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        @PutMapping("/subject-grades")
+        public ResponseEntity<AddUserSubjectGradesResponse> updateUserSubjectGrades(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody AddUserSubjectGradesDTO subjectGradesDTO) {
 
-        UserPreference userPreference = userService.getUserPreferences(userPrincipal.getId());
+                List<SubjectGrade> updatedSubjectGrades = userService.setUserSubjectGrades(userPrincipal.getId(),
+                                subjectGradesDTO);
 
-        GetUserPreferenceResponse response = GetUserPreferenceResponse.builder()
-                .userId(userPrincipal.getId())
-                .userPreference(userPreference)
-                .build();
+                AddUserSubjectGradesResponse response = AddUserSubjectGradesResponse.builder()
+                                .userId(userPrincipal.getId())
+                                .subjectGrades(updatedSubjectGrades)
+                                .build();
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @DeleteMapping
-    public ResponseEntity<DeleteUserResponse> deleteUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        DeleteUserResult result = userService.deleteUser(userPrincipal.getId());
+        @GetMapping("/preferences")
+        public ResponseEntity<GetUserPreferenceResponse> getUserPreferences(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        DeleteUserResponse response = DeleteUserResponse.builder()
-                .id(userPrincipal.getId())
-                .deletedNotes(result.deletedNotes())
-                .deletedTodos(result.deletedTodos())
-                .deletedTasks(result.deletedTasks())
-                .deletedAt(Instant.now().toString())
-                .status("SUCCESS")
-                .message("Användaren och alla relaterade resurser har raderats.")
-                .build();
+                UserPreference userPreference = userService.getUserPreferences(userPrincipal.getId());
 
-        return ResponseEntity.ok(response);
-    }
+                GetUserPreferenceResponse response = GetUserPreferenceResponse.builder()
+                                .userId(userPrincipal.getId())
+                                .userPreference(userPreference)
+                                .build();
+
+                return ResponseEntity.ok(response);
+        }
+
+        @DeleteMapping
+        public ResponseEntity<DeleteUserResponse> deleteUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+                DeleteUserResult result = userService.deleteUser(userPrincipal.getId());
+
+                DeleteUserResponse response = DeleteUserResponse.builder()
+                                .id(userPrincipal.getId())
+                                .deletedNotes(result.deletedNotes())
+                                .deletedTodos(result.deletedTodos())
+                                .deletedTasks(result.deletedTasks())
+                                .deletedAt(Instant.now().toString())
+                                .status("SUCCESS")
+                                .message("Användaren och alla relaterade resurser har raderats.")
+                                .build();
+
+                return ResponseEntity.ok(response);
+        }
 }
