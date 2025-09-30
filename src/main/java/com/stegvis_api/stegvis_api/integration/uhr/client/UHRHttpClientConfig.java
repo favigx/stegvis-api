@@ -10,7 +10,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 @Configuration
 public class UHRHttpClientConfig {
 
-    @Value("@{stegvis.uhr.get.url}")
+    @Value("${stegvis.uhr.get.url}")
     private String uhrUrl;
 
     @Bean

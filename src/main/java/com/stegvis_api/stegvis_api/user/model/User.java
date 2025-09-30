@@ -36,6 +36,7 @@ public class User {
     private String password;
     private UserPreference userPreference;
     private List<SubjectGrade> subjectGrades;
+    private double meritValue;
     private boolean hasCompletedOnboarding;
     private String stripeCustomerId;
 }

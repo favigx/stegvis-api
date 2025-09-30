@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesDTO;
 import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
+import com.stegvis_api.stegvis_api.goalplanner.service.MeritCalculatorService;
 import com.stegvis_api.stegvis_api.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.repository.TaskRepository;
 import com.stegvis_api.stegvis_api.repository.TodoRepository;
@@ -29,13 +30,15 @@ public class UserService {
     private final NoteRepository noteRepository;
     private final TaskRepository taskRepository;
     private final TodoRepository todoRepository;
+    private final MeritCalculatorService meritCalculatorService;
 
     public UserService(UserRepository userRepository, NoteRepository noteRepository, TaskRepository taskRepository,
-            TodoRepository todoRepository) {
+            TodoRepository todoRepository, MeritCalculatorService meritCalculatorService) {
         this.userRepository = userRepository;
         this.noteRepository = noteRepository;
         this.taskRepository = taskRepository;
         this.todoRepository = todoRepository;
+        this.meritCalculatorService = meritCalculatorService;
     }
 
     @Transactional
@@ -81,7 +84,10 @@ public class UserService {
             }
         }
 
-        log.debug("Updated subject grades for user id={}", userId);
+        double meritValue = meritCalculatorService.calculateMeritValue(user.getSubjectGrades());
+        user.setMeritValue(meritValue);
+
+        log.debug("Updated subject grades and merit value for user id={}", userId);
 
         userRepository.save(user);
 
