@@ -42,7 +42,7 @@ public class AuthService {
                             "E-posten är redan kopplad till ett konto");
                 });
 
-        User user = authMapper.toUserRegistrationDTO(dto);
+        User user = authMapper.toUser(dto);
 
         user.setPassword(passwordEncoder.encode(dto.password()));
 

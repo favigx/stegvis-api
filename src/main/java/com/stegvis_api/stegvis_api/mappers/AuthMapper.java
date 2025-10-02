@@ -12,8 +12,14 @@ import com.stegvis_api.stegvis_api.user.model.User;
 @Mapper(componentModel = "spring")
 public interface AuthMapper {
 
-    @Mapping(target = "password", ignore = true)
-    User toUserRegistrationDTO(UserRegistrationDTO userRegistrationDTO);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "meritValue", ignore = true)
+    @Mapping(target = "subjectGrades", ignore = true)
+    @Mapping(target = "userPreference", ignore = true)
+    @Mapping(target = "stripeCustomerId", ignore = true)
+    @Mapping(target = "hasCompletedOnboarding", ignore = true)
+    User toUser(UserRegistrationDTO dto);
 
     UserRegistrationResponse toUserRegistrationResponse(User user);
 
