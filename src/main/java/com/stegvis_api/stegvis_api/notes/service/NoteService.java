@@ -13,7 +13,7 @@ import com.stegvis_api.stegvis_api.integration.skolverket.service.SkolverketServ
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteDTO;
 import com.stegvis_api.stegvis_api.notes.dto.EditNoteDTO;
 import com.stegvis_api.stegvis_api.notes.model.Note;
-import com.stegvis_api.stegvis_api.repository.NoteRepository;
+import com.stegvis_api.stegvis_api.notes.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;

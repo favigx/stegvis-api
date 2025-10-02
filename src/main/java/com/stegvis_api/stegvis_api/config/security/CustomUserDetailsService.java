@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.stegvis_api.stegvis_api.user.model.User;
-import com.stegvis_api.stegvis_api.repository.UserRepository;
+import com.stegvis_api.stegvis_api.user.repository.UserRepository;
 
 @RequiredArgsConstructor
 @Slf4j

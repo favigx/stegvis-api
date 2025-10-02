@@ -5,12 +5,12 @@ import com.stegvis_api.stegvis_api.auth.dto.UserLoginDTO;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationDTO;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationResponse;
+import com.stegvis_api.stegvis_api.auth.mapper.AuthMapper;
 import com.stegvis_api.stegvis_api.exception.type.AuthenticationException;
 import com.stegvis_api.stegvis_api.exception.type.ResourceAlreadyExistsException;
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
-import com.stegvis_api.stegvis_api.mappers.AuthMapper;
-import com.stegvis_api.stegvis_api.repository.UserRepository;
 import com.stegvis_api.stegvis_api.user.model.User;
+import com.stegvis_api.stegvis_api.user.repository.UserRepository;
 import com.stegvis_api.stegvis_api.config.security.jwt.JwtTokenService;
 import com.stegvis_api.stegvis_api.config.security.jwt.JwtRefreshTokenService;
 

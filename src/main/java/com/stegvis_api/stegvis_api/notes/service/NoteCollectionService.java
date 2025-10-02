@@ -12,8 +12,8 @@ import com.stegvis_api.stegvis_api.notes.dto.AddNoteToCollectionDTO;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteToCollectionResponse;
 import com.stegvis_api.stegvis_api.notes.model.Note;
 import com.stegvis_api.stegvis_api.notes.model.NoteCollection;
-import com.stegvis_api.stegvis_api.repository.NoteCollectionRepository;
-import com.stegvis_api.stegvis_api.repository.NoteRepository;
+import com.stegvis_api.stegvis_api.notes.repository.NoteCollectionRepository;
+import com.stegvis_api.stegvis_api.notes.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;

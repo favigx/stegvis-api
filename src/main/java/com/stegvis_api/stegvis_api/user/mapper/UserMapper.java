@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.mappers;
+package com.stegvis_api.stegvis_api.user.mapper;
 
 import org.mapstruct.Mapper;
 

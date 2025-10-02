@@ -1,7 +1,7 @@
 package com.stegvis_api.stegvis_api.integration.stripe.service;
 
-import com.stegvis_api.stegvis_api.repository.UserRepository;
 import com.stegvis_api.stegvis_api.user.model.User;
+import com.stegvis_api.stegvis_api.user.repository.UserRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.param.CustomerCreateParams;

@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.todolist.dto.AddTodoDTO;
 import com.stegvis_api.stegvis_api.todolist.model.Todo;
-import com.stegvis_api.stegvis_api.repository.TodoRepository;
+import com.stegvis_api.stegvis_api.todolist.repository.TodoRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;

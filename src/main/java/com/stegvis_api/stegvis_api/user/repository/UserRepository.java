@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.repository;
+package com.stegvis_api.stegvis_api.user.repository;
 
 import java.util.Optional;
 

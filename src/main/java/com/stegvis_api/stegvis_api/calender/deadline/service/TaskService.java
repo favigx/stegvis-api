@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.stegvis_api.stegvis_api.calender.deadline.dto.AddTaskDTO;
 import com.stegvis_api.stegvis_api.calender.deadline.model.Task;
 import com.stegvis_api.stegvis_api.calender.deadline.model.enums.Type;
-import com.stegvis_api.stegvis_api.repository.TaskRepository;
+import com.stegvis_api.stegvis_api.calender.deadline.repository.TaskRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
