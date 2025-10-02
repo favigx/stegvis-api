@@ -14,55 +14,39 @@ import com.stegvis_api.stegvis_api.auth.dto.UserLoginResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationDTO;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationResponse;
 import com.stegvis_api.stegvis_api.auth.service.AuthService;
-import com.stegvis_api.stegvis_api.user.model.User;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 import java.net.URI;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
-
     @PostMapping("/register")
     public ResponseEntity<UserRegistrationResponse> registerUser(@Valid @RequestBody UserRegistrationDTO dto) {
-        User user = authService.register(dto);
 
-        UserRegistrationResponse response = UserRegistrationResponse.builder()
-                .id(user.getId())
-                .firstname(user.getFirstname())
-                .lastname(user.getLastname())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .build();
+        UserRegistrationResponse response = authService.register(dto);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(user.getId())
+                .buildAndExpand(response.id())
                 .toUri();
 
         return ResponseEntity.created(location).body(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginDTO dto, HttpServletResponse response) {
-        User user = authService.login(dto);
-
-        authService.setTokens(user, response);
-
-        UserLoginResponse responseDto = UserLoginResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .hasCompletedOnboarding(user.isHasCompletedOnboarding())
-                .build();
+    public ResponseEntity<UserLoginResponse> login(
+            @Valid @RequestBody UserLoginDTO dto,
+            HttpServletResponse response) {
+        UserLoginResponse responseDto = authService.login(dto, response);
 
         return ResponseEntity.ok(responseDto);
     }
@@ -72,14 +56,7 @@ public class AuthController {
             @CookieValue(value = "refresh-jwt", required = false) String refreshToken,
             HttpServletResponse response) {
 
-        User user = authService.refreshUserFromToken(refreshToken);
-
-        authService.setTokens(user, response);
-
-        RefreshTokenResponse responseDto = RefreshTokenResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .build();
+        RefreshTokenResponse responseDto = authService.refreshUserFromToken(refreshToken, response);
 
         return ResponseEntity.ok(responseDto);
     }

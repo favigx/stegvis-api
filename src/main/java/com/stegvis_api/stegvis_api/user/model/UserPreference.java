@@ -7,6 +7,7 @@ import com.stegvis_api.stegvis_api.onboarding.enums.EducationLevel;
 import com.stegvis_api.stegvis_api.onboarding.enums.FocusDay;
 import com.stegvis_api.stegvis_api.onboarding.enums.HelpRequest;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
+import com.stegvis_api.stegvis_api.onboarding.model.OnboardingSubject;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +26,7 @@ public class UserPreference {
     private String fieldOfStudy;
     private String orientation;
     private Year year;
-    private List<String> subjects;
+    private List<OnboardingSubject> subjects;
     private List<FocusDay> focusDays;
     private DailyGoal dailyGoal;
     private List<HelpRequest> helpRequests;

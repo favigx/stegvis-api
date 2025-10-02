@@ -16,8 +16,10 @@ import com.stegvis_api.stegvis_api.notes.model.Note;
 import com.stegvis_api.stegvis_api.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class NoteService {
@@ -26,14 +28,6 @@ public class NoteService {
     private final UserService userService;
     private final OpenAiNoteService openAiNoteService;
     private final SkolverketService skolverketService;
-
-    public NoteService(NoteRepository noteRepository, UserService userService, OpenAiNoteService openAiNoteService,
-            SkolverketService skolverketService) {
-        this.noteRepository = noteRepository;
-        this.userService = userService;
-        this.openAiNoteService = openAiNoteService;
-        this.skolverketService = skolverketService;
-    }
 
     @Transactional
     public Note createNote(AddNoteDTO noteDto, String userId) {

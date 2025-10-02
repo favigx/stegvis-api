@@ -1,11 +1,13 @@
 package com.stegvis_api.stegvis_api.user.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,15 +15,19 @@ import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesDTO;
 import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
 import com.stegvis_api.stegvis_api.goalplanner.service.MeritCalculatorService;
+import com.stegvis_api.stegvis_api.mappers.UserMapper;
+import com.stegvis_api.stegvis_api.onboarding.enums.Year;
 import com.stegvis_api.stegvis_api.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.repository.TaskRepository;
 import com.stegvis_api.stegvis_api.repository.TodoRepository;
 import com.stegvis_api.stegvis_api.repository.UserRepository;
 import com.stegvis_api.stegvis_api.user.dto.AddUserPreferenceOnboardingDTO;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
+import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;
 import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class UserService {
@@ -31,15 +37,7 @@ public class UserService {
     private final TaskRepository taskRepository;
     private final TodoRepository todoRepository;
     private final MeritCalculatorService meritCalculatorService;
-
-    public UserService(UserRepository userRepository, NoteRepository noteRepository, TaskRepository taskRepository,
-            TodoRepository todoRepository, MeritCalculatorService meritCalculatorService) {
-        this.userRepository = userRepository;
-        this.noteRepository = noteRepository;
-        this.taskRepository = taskRepository;
-        this.todoRepository = todoRepository;
-        this.meritCalculatorService = meritCalculatorService;
-    }
+    private final UserMapper userMapper;
 
     @Transactional
     public UserPreference setUserPreferences(String userId, AddUserPreferenceOnboardingDTO dto) {
@@ -65,6 +63,12 @@ public class UserService {
     @Transactional
     public List<SubjectGrade> setUserSubjectGrades(String userId, AddUserSubjectGradesDTO dto) {
         User user = getUserByIdOrThrow(userId);
+
+        Year year = user.getUserPreference().getYear();
+
+        if (Year.YEAR_1.equals(year)) {
+            throw new AccessDeniedException("Users in YEAR_1 are not authorized to set subject grades");
+        }
 
         if (user.getSubjectGrades() == null) {
             user.setSubjectGrades(new ArrayList<>());
@@ -123,4 +127,15 @@ public class UserService {
 
         return new DeleteUserResult(deletedNotes, deletedTodos, deletedTasks);
     }
+
+    public UserProfileResponse getUserProfileDetails(String userId) {
+        log.info("Fetching profile for userId={}", userId);
+
+        User user = getUserByIdOrThrow(userId);
+
+        log.info("Successfully fetched profile for userId={}", userId);
+
+        return userMapper.toUserProfile(user);
+    }
+
 }

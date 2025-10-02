@@ -18,19 +18,16 @@ import com.stegvis_api.stegvis_api.calender.deadline.model.enums.Type;
 import com.stegvis_api.stegvis_api.repository.TaskRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class TaskService {
 
     private final TaskRepository taskRepository;
     private final UserService userService;
-
-    public TaskService(TaskRepository taskRepository, UserService userService) {
-        this.taskRepository = taskRepository;
-        this.userService = userService;
-    }
 
     @Transactional
     public Task addToCalender(AddTaskDTO addTaskDTO, String userId) {

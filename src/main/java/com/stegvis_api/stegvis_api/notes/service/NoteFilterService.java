@@ -12,17 +12,15 @@ import org.springframework.stereotype.Service;
 import com.stegvis_api.stegvis_api.notes.dto.NoteFilterDTO;
 import com.stegvis_api.stegvis_api.notes.model.Note;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class NoteFilterService {
 
     private final MongoTemplate mongoTemplate;
-
-    public NoteFilterService(MongoTemplate mongoTemplate) {
-        this.mongoTemplate = mongoTemplate;
-    }
 
     public List<Note> filterNotes(String userId, NoteFilterDTO filterDTO) {
         Criteria criteria = Criteria.where("userId").is(userId);

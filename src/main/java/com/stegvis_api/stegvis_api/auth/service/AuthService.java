@@ -1,14 +1,20 @@
 package com.stegvis_api.stegvis_api.auth.service;
 
+import com.stegvis_api.stegvis_api.auth.dto.RefreshTokenResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserLoginDTO;
+import com.stegvis_api.stegvis_api.auth.dto.UserLoginResponse;
 import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationDTO;
+import com.stegvis_api.stegvis_api.auth.dto.UserRegistrationResponse;
 import com.stegvis_api.stegvis_api.exception.type.AuthenticationException;
 import com.stegvis_api.stegvis_api.exception.type.ResourceAlreadyExistsException;
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
+import com.stegvis_api.stegvis_api.mappers.AuthMapper;
 import com.stegvis_api.stegvis_api.repository.UserRepository;
 import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.config.security.jwt.JwtTokenService;
 import com.stegvis_api.stegvis_api.config.security.jwt.JwtRefreshTokenService;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class AuthService {
@@ -24,55 +31,49 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
     private final JwtRefreshTokenService jwtRefreshTokenService;
-
-    public AuthService(UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            JwtTokenService jwtTokenService,
-            JwtRefreshTokenService jwtRefreshTokenService) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtTokenService = jwtTokenService;
-        this.jwtRefreshTokenService = jwtRefreshTokenService;
-    }
+    private final AuthMapper authMapper;
 
     @Transactional
-    public User register(UserRegistrationDTO dto) {
-        userRepository.findByEmail(dto.getEmail())
+    public UserRegistrationResponse register(UserRegistrationDTO dto) {
+        userRepository.findByEmail(dto.email())
                 .ifPresent(user -> {
                     log.warn("Registration attempt failed: email already exists");
                     throw new ResourceAlreadyExistsException(
                             "E-posten är redan kopplad till ett konto");
                 });
 
-        User user = User.builder()
-                .firstname(dto.getFirstname())
-                .lastname(dto.getLastname())
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .build();
+        User user = authMapper.toUserRegistrationDTO(dto);
+
+        user.setPassword(passwordEncoder.encode(dto.password()));
 
         User savedUser = userRepository.save(user);
+
         log.info("User registered successfully: id={}", savedUser.getId());
-        return savedUser;
+        return authMapper.toUserRegistrationResponse(savedUser);
     }
 
-    public User login(UserLoginDTO dto) {
-        User user = userRepository.findByEmail(dto.getEmail())
+    @Transactional
+    public UserLoginResponse login(UserLoginDTO dto, HttpServletResponse response) {
+        User user = userRepository.findByEmail(dto.email())
                 .orElseThrow(() -> {
-                    log.warn("Login failed: invalid credentials");
-                    return new AuthenticationException("Ogiltlig e-post eller lösenord");
+                    log.warn("Login failed: invalid credentials for email={}", dto.email());
+                    return new AuthenticationException("Ogiltig e-post eller lösenord");
                 });
 
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
             log.warn("Login failed: invalid credentials for user id={}", user.getId());
-            throw new AuthenticationException("Ogiltlig e-post eller lösenord");
+            throw new AuthenticationException("Ogiltig e-post eller lösenord");
         }
 
+        setTokens(user, response);
+
         log.info("User logged in successfully: id={}", user.getId());
-        return user;
+
+        return authMapper.toUserLoginResponse(user);
     }
 
-    public User refreshUserFromToken(String refreshToken) {
+    @Transactional
+    public RefreshTokenResponse refreshUserFromToken(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
             log.warn("Refresh token missing");
             throw new AuthenticationException("Refresh token saknas");
@@ -92,8 +93,11 @@ public class AuthService {
                     return new ResourceNotFoundException("Användaren med id " + userId + " hittades inte");
                 });
 
+        setTokens(user, response);
+
         log.info("Refresh token validated for user id={}", userId);
-        return user;
+
+        return authMapper.toRefreshTokenResponse(user);
     }
 
     public void setTokens(User user, HttpServletResponse response) {

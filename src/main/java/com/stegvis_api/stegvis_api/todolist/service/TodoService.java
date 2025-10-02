@@ -12,19 +12,16 @@ import com.stegvis_api.stegvis_api.todolist.model.Todo;
 import com.stegvis_api.stegvis_api.repository.TodoRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class TodoService {
 
     private final TodoRepository todoRepository;
     private final UserService userService;
-
-    public TodoService(TodoRepository todoRepository, UserService userService) {
-        this.todoRepository = todoRepository;
-        this.userService = userService;
-    }
 
     @Transactional
     public Todo createTodo(AddTodoDTO todoDto, String userId) {

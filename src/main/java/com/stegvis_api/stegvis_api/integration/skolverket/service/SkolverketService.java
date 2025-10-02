@@ -1,5 +1,6 @@
 package com.stegvis_api.stegvis_api.integration.skolverket.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -15,15 +16,12 @@ import com.stegvis_api.stegvis_api.integration.skolverket.model.Course;
 import com.stegvis_api.stegvis_api.integration.skolverket.model.CourseInfo;
 import com.stegvis_api.stegvis_api.integration.skolverket.model.SubjectInfo;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class SkolverketService {
 
     private final SkolverketHttpClient skolverketHttpClient;
-
-    public SkolverketService(SkolverketHttpClient skolverketHttpClient) {
-        this.skolverketHttpClient = skolverketHttpClient;
-    }
 
     public ProgramResponse getAllPrograms() {
         try {

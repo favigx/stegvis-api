@@ -11,11 +11,14 @@ import com.stripe.model.StripeObject;
 import com.stripe.model.checkout.Session;
 import com.stripe.model.Subscription;
 import com.stripe.net.Webhook;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class StripeWebhookService {
@@ -25,11 +28,6 @@ public class StripeWebhookService {
 
     private final UserService userService;
     private final UserRepository userRepository;
-
-    public StripeWebhookService(UserService userService, UserRepository userRepository) {
-        this.userService = userService;
-        this.userRepository = userRepository;
-    }
 
     public void processEvent(String payload, String sigHeader) {
         Event event;

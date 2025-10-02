@@ -13,19 +13,16 @@ import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
 import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class GoalPlannerService {
 
     private final UserService userService;
     private final MeritCalculatorService meritCalculatorService;
-
-    public GoalPlannerService(UserService userService, MeritCalculatorService meritCalculatorService) {
-        this.userService = userService;
-        this.meritCalculatorService = meritCalculatorService;
-    }
 
     public double calculateMeriteValueForUser(String userId) {
         log.info("Starting merit value calculation for user with id={}", userId);

@@ -7,21 +7,24 @@ import com.stegvis_api.stegvis_api.integration.openai.model.AiMessage;
 import com.stegvis_api.stegvis_api.integration.skolverket.dto.SubjectCourseResponse;
 import com.stegvis_api.stegvis_api.integration.skolverket.model.CourseInfo;
 import com.stegvis_api.stegvis_api.integration.skolverket.model.SubjectInfo;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@RequiredArgsConstructor
+@Slf4j
 @Service
 public class OpenAiNoteService {
 
-    private final OpenAiHttpClient openAiHttpClient;
     @Value("${stegvis.openai.role.notes}")
     private String noteSystemPrompt;
 
-    public OpenAiNoteService(OpenAiHttpClient openAiHttpClient) {
-        this.openAiHttpClient = openAiHttpClient;
-    }
+    private final OpenAiHttpClient openAiHttpClient;
 
     private AiChatRequest buildNoteRequest(String model, String noteContent, SubjectCourseResponse subjectCourse,
             boolean stream) {

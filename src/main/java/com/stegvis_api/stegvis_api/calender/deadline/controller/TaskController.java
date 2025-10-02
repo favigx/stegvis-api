@@ -20,15 +20,14 @@ import com.stegvis_api.stegvis_api.calender.deadline.model.Task;
 import com.stegvis_api.stegvis_api.calender.deadline.service.TaskService;
 import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/calender/task")
 public class TaskController {
 
     private final TaskService taskService;
-
-    public TaskController(TaskService taskService) {
-        this.taskService = taskService;
-    }
 
     @PostMapping
     public ResponseEntity<AddTaskResponse> addTaskToCalender(

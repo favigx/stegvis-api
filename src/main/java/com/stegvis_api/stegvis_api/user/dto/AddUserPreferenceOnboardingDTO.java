@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.stegvis_api.stegvis_api.onboarding.enums.EducationLevel;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
+import com.stegvis_api.stegvis_api.onboarding.model.OnboardingSubject;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,5 +23,5 @@ public class AddUserPreferenceOnboardingDTO {
     private String fieldOfStudy;
     private String orientation;
     private Year year;
-    private List<String> subjects;
+    private List<OnboardingSubject> subjects;
 }

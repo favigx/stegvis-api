@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class StripeCheckoutService {
@@ -35,12 +37,6 @@ public class StripeCheckoutService {
 
     private final UserService userService;
     private final StripeCustomerService stripeCustomerService;
-
-    public StripeCheckoutService(UserService userService,
-            StripeCustomerService stripeCustomerService) {
-        this.userService = userService;
-        this.stripeCustomerService = stripeCustomerService;
-    }
 
     @PostConstruct
     public void init() {
