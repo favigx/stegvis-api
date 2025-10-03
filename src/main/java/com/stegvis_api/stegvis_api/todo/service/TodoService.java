@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.todolist.service;
+package com.stegvis_api.stegvis_api.todo.service;
 
 import java.time.Instant;
 import java.util.List;
@@ -7,9 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
-import com.stegvis_api.stegvis_api.todolist.dto.AddTodoDTO;
-import com.stegvis_api.stegvis_api.todolist.model.Todo;
-import com.stegvis_api.stegvis_api.todolist.repository.TodoRepository;
+import com.stegvis_api.stegvis_api.todo.dto.AddTodoDTO;
+import com.stegvis_api.stegvis_api.todo.dto.AddTodoResponse;
+import com.stegvis_api.stegvis_api.todo.dto.DeleteTodoResponse;
+import com.stegvis_api.stegvis_api.todo.dto.TodoResponse;
+import com.stegvis_api.stegvis_api.todo.mapper.TodoMapper;
+import com.stegvis_api.stegvis_api.todo.model.Todo;
+import com.stegvis_api.stegvis_api.todo.repository.TodoRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,30 +26,30 @@ public class TodoService {
 
     private final TodoRepository todoRepository;
     private final UserService userService;
+    private final TodoMapper todoMapper;
 
     @Transactional
-    public Todo createTodo(AddTodoDTO todoDto, String userId) {
+    public AddTodoResponse createTodo(AddTodoDTO todoDto, String userId) {
         userService.getUserByIdOrThrow(userId);
 
-        Todo todo = Todo.builder()
-                .userId(userId)
-                .todo(todoDto.getTodo())
-                .dateTimeCreated(Instant.now())
-                .build();
+        Todo todo = todoMapper.toTodo(todoDto);
+
+        todo.setUserId(userId);
+        todo.setDateTimeCreated(Instant.now());
 
         Todo savedTodo = todoRepository.save(todo);
         log.debug("Created todo: id={} for user id={}", savedTodo.getId(), userId);
-        return savedTodo;
+        return todoMapper.toAddTodoResponse(savedTodo);
     }
 
-    public List<Todo> getAllTodosForUser(String userId) {
+    public List<TodoResponse> getAllTodosForUser(String userId) {
         userService.getUserByIdOrThrow(userId);
         List<Todo> todos = todoRepository.findByUserId(userId);
         log.debug("Fetched {} todos for user id={}", todos.size(), userId);
-        return todos;
+        return todoMapper.toTodoResponseList(todos);
     }
 
-    public Todo deleteTodoById(String todoId, String userId) {
+    public DeleteTodoResponse deleteTodoById(String todoId, String userId) {
         userService.getUserByIdOrThrow(userId);
 
         Todo todo = todoRepository.findByIdAndUserId(todoId, userId)
@@ -57,6 +61,6 @@ public class TodoService {
 
         todoRepository.delete(todo);
         log.debug("Deleted todo: id={} for user id={}", todoId, userId);
-        return todo;
+        return todoMapper.toDeleteTodoResponse(todo);
     }
 }

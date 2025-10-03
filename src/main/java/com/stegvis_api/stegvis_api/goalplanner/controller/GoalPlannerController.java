@@ -12,15 +12,14 @@ import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
 import com.stegvis_api.stegvis_api.goalplanner.dto.MeritValueResponse;
 import com.stegvis_api.stegvis_api.goalplanner.service.GoalPlannerService;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/goalplanner")
 public class GoalPlannerController {
 
     private final GoalPlannerService goalPlannerService;
-
-    public GoalPlannerController(GoalPlannerService goalPlannerService) {
-        this.goalPlannerService = goalPlannerService;
-    }
 
     @GetMapping("/merit-value")
     public ResponseEntity<MeritValueResponse> getMeritValue(@AuthenticationPrincipal UserPrincipal userPrincipal) {

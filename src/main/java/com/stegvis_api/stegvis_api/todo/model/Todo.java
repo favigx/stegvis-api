@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.todolist.model;
+package com.stegvis_api.stegvis_api.todo.model;
 
 import java.time.Instant;
 

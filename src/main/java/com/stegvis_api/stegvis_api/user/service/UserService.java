@@ -18,7 +18,7 @@ import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
 import com.stegvis_api.stegvis_api.goalplanner.service.MeritCalculatorService;
 import com.stegvis_api.stegvis_api.notes.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
-import com.stegvis_api.stegvis_api.todolist.repository.TodoRepository;
+import com.stegvis_api.stegvis_api.todo.repository.TodoRepository;
 import com.stegvis_api.stegvis_api.user.dto.AddUserPreferenceOnboardingDTO;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
 import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;

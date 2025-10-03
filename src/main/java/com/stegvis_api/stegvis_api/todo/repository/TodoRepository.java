@@ -1,11 +1,11 @@
-package com.stegvis_api.stegvis_api.todolist.repository;
+package com.stegvis_api.stegvis_api.todo.repository;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.stegvis_api.stegvis_api.todolist.model.Todo;
+import com.stegvis_api.stegvis_api.todo.model.Todo;
 
 public interface TodoRepository extends MongoRepository<Todo, String> {
     List<Todo> findByUserId(String userId);
