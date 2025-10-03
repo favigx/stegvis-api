@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.stegvis_api.stegvis_api.notes.dto.NoteFilterDTO;
+import com.stegvis_api.stegvis_api.notes.dto.NoteResponse;
+import com.stegvis_api.stegvis_api.notes.mapper.NoteMapper;
 import com.stegvis_api.stegvis_api.notes.model.Note;
 
 import lombok.RequiredArgsConstructor;
@@ -21,22 +23,23 @@ import lombok.extern.slf4j.Slf4j;
 public class NoteFilterService {
 
     private final MongoTemplate mongoTemplate;
+    private final NoteMapper noteMapper;
 
-    public List<Note> filterNotes(String userId, NoteFilterDTO filterDTO) {
+    public List<NoteResponse> filterNotes(String userId, NoteFilterDTO filterDTO) {
         Criteria criteria = Criteria.where("userId").is(userId);
 
-        if (filterDTO.getSubject() != null && !filterDTO.getSubject().isEmpty()) {
-            criteria = criteria.and("subject").regex(filterDTO.getSubject(), "i");
+        if (filterDTO.subject() != null && !filterDTO.subject().isEmpty()) {
+            criteria = criteria.and("subject").regex(filterDTO.subject(), "i");
         }
 
-        if (filterDTO.getFromDate() != null || filterDTO.getToDate() != null) {
+        if (filterDTO.fromDate() != null || filterDTO.toDate() != null) {
             Criteria dateCriteria = Criteria.where("dateTime");
 
-            if (filterDTO.getFromDate() != null) {
-                dateCriteria = dateCriteria.gte(filterDTO.getFromDate());
+            if (filterDTO.fromDate() != null) {
+                dateCriteria = dateCriteria.gte(filterDTO.fromDate());
             }
-            if (filterDTO.getToDate() != null) {
-                Instant toInstant = filterDTO.getToDate().plusSeconds(24 * 60 * 60 - 1);
+            if (filterDTO.toDate() != null) {
+                Instant toInstant = filterDTO.toDate().plusSeconds(24 * 60 * 60 - 1);
                 dateCriteria = dateCriteria.lte(toInstant);
             }
 
@@ -44,14 +47,14 @@ public class NoteFilterService {
         }
 
         Query query = new Query(criteria);
-        Sort.Direction direction = filterDTO.isAscending() ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort.Direction direction = filterDTO.ascending() ? Sort.Direction.ASC : Sort.Direction.DESC;
         query.with(Sort.by(direction, "dateTime"));
 
         List<Note> results = mongoTemplate.find(query, Note.class);
 
         log.debug("Filtered notes for userId={}, subjectFilter={}, fromDate={}, toDate={}, results={}",
-                userId, filterDTO.getSubject(), filterDTO.getFromDate(), filterDTO.getToDate(), results.size());
+                userId, filterDTO.subject(), filterDTO.fromDate(), filterDTO.toDate(), results.size());
 
-        return results;
+        return noteMapper.toNoteResponseList(results);
     }
 }

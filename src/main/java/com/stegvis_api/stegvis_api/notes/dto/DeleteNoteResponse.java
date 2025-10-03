@@ -1,17 +1,8 @@
 package com.stegvis_api.stegvis_api.notes.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-@Builder
-@Getter
-@RequiredArgsConstructor
-public class DeleteNoteResponse {
-
-    private final String id;
-    private final String note;
-    private final String deletedAt;
-    private final String message;
-
+public record DeleteNoteResponse(
+        String id,
+        String note,
+        String deletedAt,
+        String message) {
 }

@@ -24,12 +24,15 @@ import com.stegvis_api.stegvis_api.notes.dto.AddNoteResponse;
 import com.stegvis_api.stegvis_api.notes.dto.DeleteNoteResponse;
 import com.stegvis_api.stegvis_api.notes.dto.EditNoteDTO;
 import com.stegvis_api.stegvis_api.notes.dto.EditNoteResponse;
-import com.stegvis_api.stegvis_api.notes.dto.NoteDTO;
+import com.stegvis_api.stegvis_api.notes.dto.NoteResponse;
+import com.stegvis_api.stegvis_api.notes.dto.OptimizeNoteDTO;
 import com.stegvis_api.stegvis_api.notes.dto.NoteFilterDTO;
-import com.stegvis_api.stegvis_api.notes.model.Note;
 import com.stegvis_api.stegvis_api.notes.service.NoteFilterService;
 import com.stegvis_api.stegvis_api.notes.service.NoteService;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/notes")
 public class NoteController {
@@ -37,29 +40,17 @@ public class NoteController {
         private final NoteService noteService;
         private final NoteFilterService noteFilterService;
 
-        public NoteController(NoteService noteService, NoteFilterService noteFilterService) {
-                this.noteService = noteService;
-                this.noteFilterService = noteFilterService;
-        }
-
         @PostMapping
         public ResponseEntity<AddNoteResponse> createNote(
                         @RequestBody AddNoteDTO addNoteDTO,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                Note note = noteService.createNote(addNoteDTO, userPrincipal.getId());
-
-                AddNoteResponse response = AddNoteResponse.builder()
-                                .id(note.getId())
-                                .note(note.getNote())
-                                .subject(note.getSubject())
-                                .dateTime(note.getDateTime().toString())
-                                .build();
+                AddNoteResponse response = noteService.createNote(addNoteDTO, userPrincipal.getId());
 
                 URI location = ServletUriComponentsBuilder
                                 .fromCurrentRequest()
                                 .path("/{id}")
-                                .buildAndExpand(note.getId())
+                                .buildAndExpand(response.id())
                                 .toUri();
 
                 return ResponseEntity.created(location).body(response);
@@ -71,55 +62,32 @@ public class NoteController {
                         @RequestBody EditNoteDTO editNoteDTO,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                Note updatedNote = noteService.editNote(noteId, editNoteDTO, userPrincipal.getId());
-
-                EditNoteResponse response = EditNoteResponse.builder()
-                                .id(updatedNote.getId())
-                                .note(updatedNote.getNote())
-                                .subject(updatedNote.getSubject())
-                                .dateTime(updatedNote.getDateTime().toString())
-                                .build();
+                EditNoteResponse response = noteService.editNote(noteId, editNoteDTO, noteId);
 
                 return ResponseEntity.ok(response);
         }
 
         @GetMapping("/{noteId}")
-        public ResponseEntity<NoteDTO> getNoteById(
+        public ResponseEntity<NoteResponse> getNoteById(
                         @PathVariable String noteId,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                Note note = noteService.getNoteById(userPrincipal.getId(), noteId);
-
-                NoteDTO response = NoteDTO.builder()
-                                .id(note.getId())
-                                .note(note.getNote())
-                                .subject(note.getSubject())
-                                .dateTime(note.getDateTime().toString())
-                                .build();
+                NoteResponse response = noteService.getNoteById(userPrincipal.getId(), noteId);
 
                 return ResponseEntity.ok(response);
         }
 
         @GetMapping
-        public ResponseEntity<List<NoteDTO>> getUserNotes(
+        public ResponseEntity<List<NoteResponse>> getUserNotes(
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                List<Note> notes = noteService.getAllNotesForUser(userPrincipal.getId());
-
-                List<NoteDTO> dtoList = notes.stream()
-                                .map(note -> NoteDTO.builder()
-                                                .id(note.getId())
-                                                .note(note.getNote())
-                                                .subject(note.getSubject())
-                                                .dateTime(note.getDateTime().toString())
-                                                .build())
-                                .toList();
+                List<NoteResponse> dtoList = noteService.getAllNotesForUser(userPrincipal.getId());
 
                 return ResponseEntity.ok(dtoList);
         }
 
         @GetMapping("/filter")
-        public ResponseEntity<List<NoteDTO>> filterNotes(
+        public ResponseEntity<List<NoteResponse>> filterNotes(
                         @AuthenticationPrincipal UserPrincipal userPrincipal,
                         @RequestParam(required = false) String subject,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant fromDate,
@@ -127,16 +95,8 @@ public class NoteController {
                         @RequestParam(defaultValue = "false") boolean ascending) {
 
                 NoteFilterDTO filterDTO = new NoteFilterDTO(subject, fromDate, toDate, ascending);
-                List<Note> notes = noteFilterService.filterNotes(userPrincipal.getId(), filterDTO);
 
-                List<NoteDTO> dtoList = notes.stream()
-                                .map(note -> NoteDTO.builder()
-                                                .id(note.getId())
-                                                .note(note.getNote())
-                                                .subject(note.getSubject())
-                                                .dateTime(note.getDateTime().toString())
-                                                .build())
-                                .toList();
+                List<NoteResponse> dtoList = noteFilterService.filterNotes(userPrincipal.getId(), filterDTO);
 
                 return ResponseEntity.ok(dtoList);
         }
@@ -146,14 +106,7 @@ public class NoteController {
                         @PathVariable String noteId,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                Note deletedNote = noteService.deleteNoteById(noteId, userPrincipal.getId());
-
-                DeleteNoteResponse response = DeleteNoteResponse.builder()
-                                .id(deletedNote.getId())
-                                .note(deletedNote.getNote())
-                                .deletedAt(Instant.now().toString())
-                                .message("Note har raderats framgångsrikt.")
-                                .build();
+                DeleteNoteResponse response = noteService.deleteNoteById(noteId, userPrincipal.getId());
 
                 return ResponseEntity.ok(response);
         }
@@ -165,20 +118,13 @@ public class NoteController {
                 return ResponseEntity.ok(count);
         }
 
-        @PutMapping("/{noteId}/optimize/{subjectCode}/{courseCode}")
-        public ResponseEntity<NoteDTO> optimizeNote(
-                        @PathVariable String noteId, @PathVariable String subjectCode, @PathVariable String courseCode,
+        @PutMapping("/{noteId}/optimize")
+        public ResponseEntity<NoteResponse> optimizeNote(
+                        @PathVariable String noteId,
+                        @RequestBody OptimizeNoteDTO optimizeDto,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                Note optimizedNote = noteService.optimizeNoteWithAI(noteId, userPrincipal.getId(), subjectCode,
-                                courseCode);
-
-                NoteDTO response = NoteDTO.builder()
-                                .id(optimizedNote.getId())
-                                .note(optimizedNote.getNote())
-                                .subject(optimizedNote.getSubject())
-                                .dateTime(optimizedNote.getDateTime().toString())
-                                .build();
+                NoteResponse response = noteService.optimizeNoteWithAI(noteId, userPrincipal.getId(), optimizeDto);
 
                 return ResponseEntity.ok(response);
         }

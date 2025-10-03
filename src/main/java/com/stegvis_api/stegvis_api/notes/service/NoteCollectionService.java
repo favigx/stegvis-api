@@ -8,8 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteCollectionDTO;
+import com.stegvis_api.stegvis_api.notes.dto.AddNoteCollectionResponse;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteToCollectionDTO;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteToCollectionResponse;
+import com.stegvis_api.stegvis_api.notes.dto.NoteCollectionResponse;
+import com.stegvis_api.stegvis_api.notes.mapper.NoteMapper;
 import com.stegvis_api.stegvis_api.notes.model.Note;
 import com.stegvis_api.stegvis_api.notes.model.NoteCollection;
 import com.stegvis_api.stegvis_api.notes.repository.NoteCollectionRepository;
@@ -27,63 +30,59 @@ public class NoteCollectionService {
     private final NoteCollectionRepository noteCollectionRepository;
     private final NoteRepository noteRepository;
     private final UserService userService;
+    private final NoteMapper noteMapper;
 
     @Transactional
-    public NoteCollection createNoteCollection(AddNoteCollectionDTO noteCollectionDTO, String userId) {
+    public AddNoteCollectionResponse createNoteCollection(AddNoteCollectionDTO noteCollectionDto, String userId) {
         userService.getUserByIdOrThrow(userId);
 
-        NoteCollection noteCollection = NoteCollection.builder()
-                .userId(userId)
-                .name(noteCollectionDTO.getName())
-                .notes(new ArrayList<>())
-                .build();
+        NoteCollection noteCollection = noteMapper.toNoteCollection(noteCollectionDto);
+
+        noteCollection.setUserId(userId);
+        noteCollection.setNotes(new ArrayList<>());
 
         NoteCollection savedNoteCollection = noteCollectionRepository.save(noteCollection);
         log.info("NoteCollection created for userId={}, noteCollectionId={}", userId, savedNoteCollection.getId());
-        return savedNoteCollection;
+        return noteMapper.toAddNoteCollectionResponse(savedNoteCollection);
     }
 
     @Transactional
     public AddNoteToCollectionResponse addNoteToCollection(AddNoteToCollectionDTO dto, String userId) {
         userService.getUserByIdOrThrow(userId);
 
-        Note note = noteRepository.findByIdAndUserId(dto.getNoteId(), userId)
-                .orElseThrow(() -> {
-                    log.warn("Add failed: noteId={} not found for userId={}", dto.getNoteId(), userId);
-                    return new ResourceNotFoundException("Note hittades inte för användare");
-                });
+        Note note = noteRepository.findByIdAndUserId(dto.noteId(), userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Note hittades inte för användare"));
 
-        NoteCollection collection = noteCollectionRepository.findByIdAndUserId(dto.getCollectionId(), userId)
-                .orElseThrow(() -> {
-                    log.warn("Add failed: collectionId={} not found for userId={}", dto.getCollectionId(), userId);
-                    return new ResourceNotFoundException("Collection hittades inte för användare");
-                });
+        NoteCollection collection = noteCollectionRepository.findByIdAndUserId(dto.collectionId(), userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Collection hittades inte för användare"));
 
+        if (collection.getNotes() == null) {
+            collection.setNotes(new ArrayList<>());
+        }
         collection.addNote(note);
         noteCollectionRepository.save(collection);
 
-        log.info("Note med id={} tillagd i collection={} för userId={}", dto.getNoteId(), dto.getCollectionId(),
-                userId);
+        log.info("Note med id={} tillagd i collection={} för userId={}", dto.noteId(), dto.collectionId(), userId);
 
-        return AddNoteToCollectionResponse.builder()
-                .id(collection.getId())
-                .name(collection.getName())
-                .noteId(note.getId())
-                .noteCount(collection.getNotes().size())
-                .build();
+        return noteMapper.toAddNoteToCollectionResponse(collection, note.getId());
     }
 
-    public NoteCollection getNoteCollectionWithNotes(String collectionId, String userId) {
+    public NoteCollectionResponse getNoteCollectionWithNotes(String collectionId, String userId) {
         userService.getUserByIdOrThrow(userId);
 
-        return noteCollectionRepository.findByIdAndUserId(collectionId, userId)
+        NoteCollection noteCollection = noteCollectionRepository.findByIdAndUserId(collectionId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Collection hittades inte för userId=" + userId));
+
+        return noteMapper.toNoteCollectionResponse(noteCollection);
     }
 
-    public List<NoteCollection> getAllNoteCollections(String userId) {
+    public List<NoteCollectionResponse> getAllNoteCollections(String userId) {
         userService.getUserByIdOrThrow(userId);
 
-        return noteCollectionRepository.findByUserId(userId);
+        List<NoteCollection> noteCollections = noteCollectionRepository.findByUserId(userId);
+        log.debug("Fetched {} notecollections for userId={}", noteCollections.size(), userId);
+
+        return noteMapper.toNoteCollectionResponseList(noteCollections);
     }
 }

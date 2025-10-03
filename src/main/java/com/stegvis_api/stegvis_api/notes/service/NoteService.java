@@ -11,7 +11,13 @@ import com.stegvis_api.stegvis_api.integration.openai.service.OpenAiNoteService;
 import com.stegvis_api.stegvis_api.integration.skolverket.dto.SubjectCourseResponse;
 import com.stegvis_api.stegvis_api.integration.skolverket.service.SkolverketService;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteDTO;
+import com.stegvis_api.stegvis_api.notes.dto.AddNoteResponse;
+import com.stegvis_api.stegvis_api.notes.dto.DeleteNoteResponse;
 import com.stegvis_api.stegvis_api.notes.dto.EditNoteDTO;
+import com.stegvis_api.stegvis_api.notes.dto.EditNoteResponse;
+import com.stegvis_api.stegvis_api.notes.dto.NoteResponse;
+import com.stegvis_api.stegvis_api.notes.dto.OptimizeNoteDTO;
+import com.stegvis_api.stegvis_api.notes.mapper.NoteMapper;
 import com.stegvis_api.stegvis_api.notes.model.Note;
 import com.stegvis_api.stegvis_api.notes.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.user.service.UserService;
@@ -28,24 +34,23 @@ public class NoteService {
     private final UserService userService;
     private final OpenAiNoteService openAiNoteService;
     private final SkolverketService skolverketService;
+    private final NoteMapper noteMapper;
 
     @Transactional
-    public Note createNote(AddNoteDTO noteDto, String userId) {
+    public AddNoteResponse createNote(AddNoteDTO noteDto, String userId) {
         userService.getUserByIdOrThrow(userId);
 
-        Note note = Note.builder()
-                .userId(userId)
-                .note(noteDto.getNote())
-                .subject(noteDto.getSubject())
-                .dateTime(Instant.now())
-                .build();
+        Note note = noteMapper.toNote(noteDto);
+
+        note.setUserId(userId);
+        note.setDateTime(Instant.now());
 
         Note savedNote = noteRepository.save(note);
         log.info("Note created for userId={}, noteId={}", userId, savedNote.getId());
-        return savedNote;
+        return noteMapper.toAddResponse(savedNote);
     }
 
-    public Note editNote(String noteId, EditNoteDTO editDto, String userId) {
+    public EditNoteResponse editNote(String noteId, EditNoteDTO editDto, String userId) {
         userService.getUserByIdOrThrow(userId);
 
         Note note = noteRepository.findByIdAndUserId(noteId, userId)
@@ -54,35 +59,36 @@ public class NoteService {
                     return new ResourceNotFoundException("Note hittades inte för användare");
                 });
 
-        Note updatedNote = note.toBuilder()
-                .note(editDto.getNote() != null ? editDto.getNote() : note.getNote())
-                .subject(editDto.getSubject() != null ? editDto.getSubject() : note.getSubject())
-                .dateTime(Instant.now())
-                .build();
+        noteMapper.updateNoteFromDto(editDto, note);
 
-        Note savedNote = noteRepository.save(updatedNote);
+        note.setDateTime(Instant.now());
+
+        Note savedNote = noteRepository.save(note);
         log.info("Note updated for userId={}, noteId={}", userId, savedNote.getId());
-        return savedNote;
+        return noteMapper.toEditNoteResponse(savedNote);
     }
 
-    public Note getNoteById(String userId, String noteId) {
+    public NoteResponse getNoteById(String userId, String noteId) {
         userService.getUserByIdOrThrow(userId);
 
-        return noteRepository.findByIdAndUserId(noteId, userId)
+        Note note = noteRepository.findByIdAndUserId(noteId, userId)
                 .orElseThrow(() -> {
                     log.warn("Note not found: noteId={} for userId={}", noteId, userId);
                     return new ResourceNotFoundException("Note not found");
                 });
+        return noteMapper.toNoteResponse(note);
     }
 
-    public List<Note> getAllNotesForUser(String userId) {
+    public List<NoteResponse> getAllNotesForUser(String userId) {
         userService.getUserByIdOrThrow(userId);
+
         List<Note> notes = noteRepository.findByUserId(userId);
         log.debug("Fetched {} notes for userId={}", notes.size(), userId);
-        return notes;
+        return noteMapper.toNoteResponseList(notes);
     }
 
-    public Note deleteNoteById(String noteId, String userId) {
+    @Transactional
+    public DeleteNoteResponse deleteNoteById(String noteId, String userId) {
         userService.getUserByIdOrThrow(userId);
 
         Note note = noteRepository.findByIdAndUserId(noteId, userId)
@@ -93,7 +99,7 @@ public class NoteService {
 
         noteRepository.delete(note);
         log.info("Note deleted for userId={}, noteId={}", userId, noteId);
-        return note;
+        return noteMapper.toDeleteNoteResponse(note);
     }
 
     public long countNotesByUserId(String userId) {
@@ -105,7 +111,7 @@ public class NoteService {
     }
 
     @Transactional
-    public Note optimizeNoteWithAI(String noteId, String userId, String subjectCode, String courseCode) {
+    public NoteResponse optimizeNoteWithAI(String noteId, String userId, OptimizeNoteDTO optimizeNoteDTO) {
         userService.getUserByIdOrThrow(userId);
 
         Note note = noteRepository.findByIdAndUserId(noteId, userId)
@@ -114,17 +120,15 @@ public class NoteService {
                     return new ResourceNotFoundException("Note hittades inte för användare");
                 });
 
-        SubjectCourseResponse subjectCourse = skolverketService.getSubjectCourseDetails(subjectCode, courseCode);
+        SubjectCourseResponse subjectCourse = skolverketService.getSubjectCourseDetails(optimizeNoteDTO.subjectCode(),
+                optimizeNoteDTO.courseCode());
 
         String optimizedContent = openAiNoteService.generateOptimizedNote(note.getNote(), subjectCourse);
 
-        Note updatedNote = note.toBuilder()
-                .note(optimizedContent)
-                .dateTime(Instant.now())
-                .build();
+        Note updatedNote = noteMapper.toOptimizedNote(note, optimizedContent);
 
         Note savedNote = noteRepository.save(updatedNote);
         log.info("Note optimized with AI for userId={}, noteId={}", userId, noteId);
-        return savedNote;
+        return noteMapper.toNoteResponse(savedNote);
     }
 }

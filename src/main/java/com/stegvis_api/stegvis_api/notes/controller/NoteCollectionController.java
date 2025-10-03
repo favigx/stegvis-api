@@ -18,102 +18,64 @@ import com.stegvis_api.stegvis_api.notes.dto.AddNoteCollectionDTO;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteCollectionResponse;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteToCollectionDTO;
 import com.stegvis_api.stegvis_api.notes.dto.AddNoteToCollectionResponse;
-import com.stegvis_api.stegvis_api.notes.dto.NoteCollectionDTO;
-import com.stegvis_api.stegvis_api.notes.dto.NoteDTO;
-import com.stegvis_api.stegvis_api.notes.model.NoteCollection;
+import com.stegvis_api.stegvis_api.notes.dto.NoteCollectionResponse;
 import com.stegvis_api.stegvis_api.notes.service.NoteCollectionService;
 
 @RestController
 @RequestMapping("/api/notes/notecollection")
 public class NoteCollectionController {
 
-    private final NoteCollectionService noteCollectionService;
+        private final NoteCollectionService noteCollectionService;
 
-    public NoteCollectionController(NoteCollectionService noteCollectionService) {
-        this.noteCollectionService = noteCollectionService;
-    }
+        public NoteCollectionController(NoteCollectionService noteCollectionService) {
+                this.noteCollectionService = noteCollectionService;
+        }
 
-    @PostMapping
-    public ResponseEntity<AddNoteCollectionResponse> createNoteCollection(
-            @RequestBody AddNoteCollectionDTO addNoteCollectionDTO,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        NoteCollection noteCollection = noteCollectionService.createNoteCollection(addNoteCollectionDTO,
-                userPrincipal.getId());
+        @PostMapping
+        public ResponseEntity<AddNoteCollectionResponse> createNoteCollection(
+                        @RequestBody AddNoteCollectionDTO addNoteCollectionDTO,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+                AddNoteCollectionResponse response = noteCollectionService.createNoteCollection(addNoteCollectionDTO,
+                                userPrincipal.getId());
 
-        AddNoteCollectionResponse response = AddNoteCollectionResponse.builder()
-                .id(noteCollection.getId())
-                .name(noteCollection.getName())
-                .build();
+                URI location = ServletUriComponentsBuilder
+                                .fromCurrentRequest()
+                                .path("/{id}")
+                                .buildAndExpand(response.id())
+                                .toUri();
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(noteCollection.getId()).toUri();
+                return ResponseEntity.created(location).body(response);
 
-        return ResponseEntity.created(location).body(response);
+        }
 
-    }
+        @PostMapping("/add-note")
+        public ResponseEntity<AddNoteToCollectionResponse> addNoteToCollection(
+                        @RequestBody AddNoteToCollectionDTO dto,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-    @PostMapping("/add-note")
-    public ResponseEntity<AddNoteToCollectionResponse> addNoteToCollection(
-            @RequestBody AddNoteToCollectionDTO dto,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+                AddNoteToCollectionResponse response = noteCollectionService.addNoteToCollection(dto,
+                                userPrincipal.getId());
+                return ResponseEntity.ok(response);
+        }
 
-        AddNoteToCollectionResponse response = noteCollectionService.addNoteToCollection(dto, userPrincipal.getId());
-        return ResponseEntity.ok(response);
-    }
+        @GetMapping("/{collectionId}")
+        public ResponseEntity<NoteCollectionResponse> getNoteCollection(
+                        @PathVariable String collectionId,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-    @GetMapping("/{collectionId}")
-    public ResponseEntity<NoteCollectionDTO> getNoteCollection(
-            @PathVariable String collectionId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+                NoteCollectionResponse response = noteCollectionService
+                                .getNoteCollectionWithNotes(collectionId, userPrincipal.getId());
 
-        NoteCollection collection = noteCollectionService.getNoteCollectionWithNotes(collectionId,
-                userPrincipal.getId());
+                return ResponseEntity.ok(response);
+        }
 
-        List<NoteDTO> noteDTOs = collection.getNotes().stream()
-                .map(note -> NoteDTO.builder()
-                        .id(note.getId())
-                        .note(note.getNote())
-                        .subject(note.getSubject())
-                        .dateTime(note.getDateTime().toString())
-                        .build())
-                .toList();
+        @GetMapping
+        public ResponseEntity<List<NoteCollectionResponse>> getAllNoteCollections(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        NoteCollectionDTO dto = NoteCollectionDTO.builder()
-                .id(collection.getId())
-                .name(collection.getName())
-                .notes(noteDTOs)
-                .build();
+                List<NoteCollectionResponse> dtoList = noteCollectionService
+                                .getAllNoteCollections(userPrincipal.getId());
 
-        return ResponseEntity.ok(dto);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<NoteCollectionDTO>> getAllNoteCollections(
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-
-        List<NoteCollection> collections = noteCollectionService.getAllNoteCollections(userPrincipal.getId());
-
-        List<NoteCollectionDTO> dtos = collections.stream()
-                .map(collection -> {
-                    List<NoteDTO> noteDTOs = collection.getNotes().stream()
-                            .map(note -> NoteDTO.builder()
-                                    .id(note.getId())
-                                    .note(note.getNote())
-                                    .subject(note.getSubject())
-                                    .dateTime(note.getDateTime().toString())
-                                    .build())
-                            .toList();
-
-                    return NoteCollectionDTO.builder()
-                            .id(collection.getId())
-                            .name(collection.getName())
-                            .notes(noteDTOs)
-                            .build();
-                })
-                .toList();
-
-        return ResponseEntity.ok(dtos);
-    }
+                return ResponseEntity.ok(dtoList);
+        }
 }
