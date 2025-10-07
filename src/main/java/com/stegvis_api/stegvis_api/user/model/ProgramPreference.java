@@ -1,4 +1,4 @@
-package com.stegvis_api.stegvis_api.onboarding.model;
+package com.stegvis_api.stegvis_api.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OnboardingSubject {
+public class ProgramPreference {
 
-    private String courseName;
-    private String courseCode;
-    private int coursePoints;
+    private String name;
+    private String code;
 }

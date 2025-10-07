@@ -1,0 +1,19 @@
+package com.stegvis_api.stegvis_api.user.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class OrientationPreference {
+
+    private String name;
+    private String code;
+    private int points;
+}

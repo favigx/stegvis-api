@@ -16,11 +16,13 @@ import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
 import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesDTO;
 import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesResponse;
 import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
-import com.stegvis_api.stegvis_api.user.dto.AddUserPreferenceOnboardingDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
 import com.stegvis_api.stegvis_api.user.dto.GetUserPreferenceResponse;
-import com.stegvis_api.stegvis_api.user.dto.UserPreferenceResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
 import com.stegvis_api.stegvis_api.user.service.UserService;
@@ -36,18 +38,25 @@ public class UserController {
         }
 
         @PutMapping("/preferences")
-        public ResponseEntity<UserPreferenceResponse> updateUserPreferences(
+        public ResponseEntity<AddOnboardingPreferencesResponse> updateUserPreferences(
                         @AuthenticationPrincipal UserPrincipal userPrincipal,
-                        @RequestBody AddUserPreferenceOnboardingDTO preferenceDTO) {
+                        @RequestBody AddOnboardingPreferencesDTO preferenceDTO) {
 
-                UserPreference updatedPreference = userService.setUserPreferences(userPrincipal.getId(), preferenceDTO);
-
-                UserPreferenceResponse response = UserPreferenceResponse.builder()
-                                .userId(userPrincipal.getId())
-                                .userPreference(updatedPreference)
-                                .build();
+                AddOnboardingPreferencesResponse response = userService.setUserPreferences(preferenceDTO,
+                                userPrincipal.getId());
 
                 return ResponseEntity.ok(response);
+        }
+
+        @PutMapping("/preferences/subjects")
+        public ResponseEntity<List<AddSubjectPreferencesResponse>> updateUserSubjectPreferences(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody List<AddSubjectPreferencesDTO> subjectPreferencesDTO) {
+
+                List<AddSubjectPreferencesResponse> responses = userService
+                                .setUserSubjectPreferences(subjectPreferencesDTO, userPrincipal.getId());
+
+                return ResponseEntity.ok(responses);
         }
 
         @PutMapping("/subject-grades")

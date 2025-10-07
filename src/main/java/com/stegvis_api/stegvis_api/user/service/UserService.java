@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -19,10 +22,14 @@ import com.stegvis_api.stegvis_api.goalplanner.service.MeritCalculatorService;
 import com.stegvis_api.stegvis_api.notes.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
 import com.stegvis_api.stegvis_api.todo.repository.TodoRepository;
-import com.stegvis_api.stegvis_api.user.dto.AddUserPreferenceOnboardingDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
 import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;
 import com.stegvis_api.stegvis_api.user.mapper.UserMapper;
+import com.stegvis_api.stegvis_api.user.model.SubjectPreference;
 import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
 import com.stegvis_api.stegvis_api.user.repository.UserRepository;
@@ -40,24 +47,46 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Transactional
-    public UserPreference setUserPreferences(String userId, AddUserPreferenceOnboardingDTO dto) {
+    public AddOnboardingPreferencesResponse setUserPreferences(AddOnboardingPreferencesDTO dto, String userId) {
         User user = getUserByIdOrThrow(userId);
 
-        UserPreference preference = UserPreference.builder()
-                .educationLevel(dto.getEducationLevel())
-                .fieldOfStudy(dto.getFieldOfStudy())
-                .orientation(dto.getOrientation())
-                .year(dto.getYear())
-                .subjects(dto.getSubjects())
-                .build();
+        UserPreference userPreference = userMapper.toUserPreference(dto);
 
-        user.setUserPreference(preference);
+        user.setUserPreference(userPreference);
         user.setHasCompletedOnboarding(true);
 
         userRepository.save(user);
 
         log.debug("Set onboarding preferences for user id={}", userId);
-        return preference;
+
+        return userMapper.toOnboardingPreferencesResponse(userPreference);
+    }
+
+    @Transactional
+    public List<AddSubjectPreferencesResponse> setUserSubjectPreferences(
+            List<AddSubjectPreferencesDTO> dtos, String userId) {
+
+        User user = getUserByIdOrThrow(userId);
+
+        if (user.getUserPreference().getSubjects() == null) {
+            user.getUserPreference().setSubjects(new ArrayList<>());
+        }
+
+        List<SubjectPreference> incomingSubjects = userMapper.toSubjectPreferences(dtos);
+
+        Set<String> existingCourseCodes = user.getUserPreference().getSubjects()
+                .stream()
+                .map(SubjectPreference::getCourseCode)
+                .collect(Collectors.toSet());
+
+        List<SubjectPreference> subjectsToAdd = incomingSubjects.stream()
+                .filter(s -> !existingCourseCodes.contains(s.getCourseCode()))
+                .collect(Collectors.toList());
+
+        user.getUserPreference().getSubjects().addAll(subjectsToAdd);
+        userRepository.save(user);
+
+        return userMapper.toSubjectPreferencesResponses(subjectsToAdd);
     }
 
     @Transactional

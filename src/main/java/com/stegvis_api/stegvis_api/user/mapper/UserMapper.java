@@ -1,12 +1,36 @@
 package com.stegvis_api.stegvis_api.user.mapper;
 
-import org.mapstruct.Mapper;
+import java.util.List;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;
+import com.stegvis_api.stegvis_api.user.model.SubjectPreference;
 import com.stegvis_api.stegvis_api.user.model.User;
+import com.stegvis_api.stegvis_api.user.model.UserPreference;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
     UserProfileResponse toUserProfile(User user);
+
+    @Mapping(target = "subjects", ignore = true)
+    UserPreference toUserPreference(AddOnboardingPreferencesDTO dto);
+
+    AddOnboardingPreferencesResponse toOnboardingPreferencesResponse(UserPreference userPreference);
+
+    @Mapping(target = "grade", ignore = true)
+    SubjectPreference toSubjectPreference(AddSubjectPreferencesDTO dto);
+
+    AddSubjectPreferencesResponse toSubjectPreferencesResponse(SubjectPreference subjectPreference);
+
+    List<SubjectPreference> toSubjectPreferences(List<AddSubjectPreferencesDTO> dtos);
+
+    List<AddSubjectPreferencesResponse> toSubjectPreferencesResponses(List<SubjectPreference> subjects);
+
 }
