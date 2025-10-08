@@ -14,8 +14,6 @@ public interface AuthMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "role", ignore = true)
-    @Mapping(target = "meritValue", ignore = true)
-    @Mapping(target = "subjectGrades", ignore = true)
     @Mapping(target = "userPreference", ignore = true)
     @Mapping(target = "stripeCustomerId", ignore = true)
     @Mapping(target = "hasCompletedOnboarding", ignore = true)
@@ -26,5 +24,4 @@ public interface AuthMapper {
     UserLoginResponse toUserLoginResponse(User user);
 
     RefreshTokenResponse toRefreshTokenResponse(User user);
-
 }

@@ -13,13 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
-import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesDTO;
-import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesResponse;
-import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesResponse;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesGradeDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesGradeResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
 import com.stegvis_api.stegvis_api.user.dto.GetUserPreferenceResponse;
@@ -59,18 +58,14 @@ public class UserController {
                 return ResponseEntity.ok(responses);
         }
 
-        @PutMapping("/subject-grades")
-        public ResponseEntity<AddUserSubjectGradesResponse> updateUserSubjectGrades(
+        @PutMapping("/preferences/subject-grades")
+        public ResponseEntity<AddSubjectPreferencesGradeResponse> updateUserSubjectGrades(
                         @AuthenticationPrincipal UserPrincipal userPrincipal,
-                        @RequestBody AddUserSubjectGradesDTO subjectGradesDTO) {
+                        @RequestBody List<AddSubjectPreferencesGradeDTO> subjectGradesDTOs) {
 
-                List<SubjectGrade> updatedSubjectGrades = userService.setUserSubjectGrades(userPrincipal.getId(),
-                                subjectGradesDTO);
-
-                AddUserSubjectGradesResponse response = AddUserSubjectGradesResponse.builder()
-                                .userId(userPrincipal.getId())
-                                .subjectGrades(updatedSubjectGrades)
-                                .build();
+                AddSubjectPreferencesGradeResponse response = userService.setUserSubjectGrades(
+                                userPrincipal.getId(),
+                                subjectGradesDTOs);
 
                 return ResponseEntity.ok(response);
         }

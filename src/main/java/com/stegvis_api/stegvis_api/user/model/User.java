@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
 import com.stegvis_api.stegvis_api.user.enums.Role;
 
 import lombok.AllArgsConstructor;
@@ -30,13 +29,9 @@ public class User {
 
     private String firstname;
     private String lastname;
-
     private String email;
-
     private String password;
     private UserPreference userPreference;
-    private List<SubjectGrade> subjectGrades;
-    private double meritValue;
     private boolean hasCompletedOnboarding;
     private String stripeCustomerId;
 }

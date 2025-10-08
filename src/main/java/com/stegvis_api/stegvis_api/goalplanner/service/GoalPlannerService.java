@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
 import com.stegvis_api.stegvis_api.goalplanner.enums.Grade;
-import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
 import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.service.UserService;
 
@@ -24,20 +23,21 @@ public class GoalPlannerService {
     private final UserService userService;
     private final MeritCalculatorService meritCalculatorService;
 
-    public double calculateMeriteValueForUser(String userId) {
-        log.info("Starting merit value calculation for user with id={}", userId);
+    // public double calculateMeriteValueForUser(String userId) {
+    // log.info("Starting merit value calculation for user with id={}", userId);
 
-        User user = userService.getUserByIdOrThrow(userId);
+    // User user = userService.getUserByIdOrThrow(userId);
 
-        List<SubjectGrade> subjectGrades = user.getSubjectGrades();
+    // List<SubjectGrade> subjectGrades = user.getSubjectGrades();
 
-        if (subjectGrades == null || subjectGrades.isEmpty()) {
-            log.warn("No grades set for user with id={}", userId);
-            throw new ResourceNotFoundException("Inga betyg är satta för användare" + userId);
-        }
+    // if (subjectGrades == null || subjectGrades.isEmpty()) {
+    // log.warn("No grades set for user with id={}", userId);
+    // throw new ResourceNotFoundException("Inga betyg är satta för användare" +
+    // userId);
+    // }
 
-        return meritCalculatorService.calculateMeritValue(subjectGrades);
-    }
+    // return meritCalculatorService.calculateMeritValue(subjectGrades);
+    // }
 
     public Map<String, Object> getGradeEnums() {
         Map<String, Object> enums = new HashMap<>();

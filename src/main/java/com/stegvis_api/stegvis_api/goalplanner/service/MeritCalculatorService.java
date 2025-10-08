@@ -6,7 +6,9 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.stegvis_api.stegvis_api.goalplanner.enums.Grade;
-import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
+import com.stegvis_api.stegvis_api.user.model.SubjectPreference;
+import com.stegvis_api.stegvis_api.user.model.User;
+import com.stegvis_api.stegvis_api.user.model.UserPreference;
 
 @Service
 public class MeritCalculatorService {
@@ -19,13 +21,26 @@ public class MeritCalculatorService {
             Grade.E, 10.0,
             Grade.F, 0.0);
 
-    public double calculateMeritValue(List<SubjectGrade> subjects) {
+    public double calculateMeritValue(User user) {
+        UserPreference preference = user.getUserPreference();
+        if (preference == null || preference.getSubjects() == null || preference.getSubjects().isEmpty()) {
+            return 0.0;
+        }
+
+        return calculateMeritValueFromSubjects(preference.getSubjects());
+    }
+
+    public double calculateMeritValueFromSubjects(List<SubjectPreference> subjects) {
         double totalPoints = 0;
         double totalWeighted = 0;
 
-        for (SubjectGrade sg : subjects) {
-            double gradeValue = GRADE_VALUES.getOrDefault(sg.getGrade(), 0.0);
-            double coursePoints = sg.getCoursePoints();
+        for (SubjectPreference sp : subjects) {
+            if (sp.getGrade() == null)
+                continue;
+
+            double gradeValue = GRADE_VALUES.getOrDefault(sp.getGrade(), 0.0);
+            double coursePoints = sp.getCoursePoints();
+
             totalPoints += coursePoints;
             totalWeighted += gradeValue * coursePoints;
         }

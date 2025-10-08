@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.calender.deadline.repository.TaskRepository;
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
-import com.stegvis_api.stegvis_api.goalplanner.dto.AddUserSubjectGradesDTO;
-import com.stegvis_api.stegvis_api.goalplanner.model.SubjectGrade;
 import com.stegvis_api.stegvis_api.goalplanner.service.MeritCalculatorService;
 import com.stegvis_api.stegvis_api.notes.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
@@ -26,6 +22,8 @@ import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesResponse;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesGradeDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesGradeResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
 import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;
 import com.stegvis_api.stegvis_api.user.mapper.UserMapper;
@@ -90,41 +88,40 @@ public class UserService {
     }
 
     @Transactional
-    public List<SubjectGrade> setUserSubjectGrades(String userId, AddUserSubjectGradesDTO dto) {
+    public AddSubjectPreferencesGradeResponse setUserSubjectGrades(String userId,
+            List<AddSubjectPreferencesGradeDTO> dtos) {
         User user = getUserByIdOrThrow(userId);
 
-        Year year = user.getUserPreference().getYear();
+        UserPreference preference = user.getUserPreference();
+        if (preference == null) {
+            throw new AccessDeniedException("Du måste först genomföra onboarding och registrera dina preferenser");
+        }
 
+        Year year = preference.getYear();
         if (Year.YEAR_1.equals(year)) {
-            throw new AccessDeniedException("Users in YEAR_1 are not authorized to set subject grades");
+            throw new AccessDeniedException("Användare i YEAR_1 får inte sätta betyg ännu");
         }
 
-        if (user.getSubjectGrades() == null) {
-            user.setSubjectGrades(new ArrayList<>());
+        List<SubjectPreference> subjects = preference.getSubjects();
+        if (subjects == null || subjects.isEmpty()) {
+            throw new AccessDeniedException("Du måste registrera dina ämnen och kurser innan du kan sätta betyg");
         }
 
-        for (SubjectGrade newGrade : dto.getSubjectGrades()) {
-            Optional<SubjectGrade> existing = user.getSubjectGrades().stream()
-                    .filter(sg -> sg.getSubjectName().equalsIgnoreCase(newGrade.getSubjectName()))
-                    .findFirst();
-
-            if (existing.isPresent()) {
-                SubjectGrade sg = existing.get();
-                sg.setGrade(newGrade.getGrade());
-                sg.setCoursePoints(newGrade.getCoursePoints());
-            } else {
-                user.getSubjectGrades().add(newGrade);
-            }
+        for (AddSubjectPreferencesGradeDTO dto : dtos) {
+            subjects.stream()
+                    .filter(sp -> sp.getCourseCode().equalsIgnoreCase(dto.courseCode()))
+                    .findFirst()
+                    .ifPresent(sp -> userMapper.updateGradeFromDto(dto, sp));
         }
 
-        double meritValue = meritCalculatorService.calculateMeritValue(user.getSubjectGrades());
-        user.setMeritValue(meritValue);
+        double meritValue = meritCalculatorService.calculateMeritValueFromSubjects(subjects);
+        user.getUserPreference().setMeritValue(meritValue);
 
-        log.debug("Updated subject grades and merit value for user id={}", userId);
+        log.info("Updated subject grades and merit value for user id={}", userId);
 
         userRepository.save(user);
 
-        return user.getSubjectGrades();
+        return userMapper.toSubjectPreferencesGradeResponse(subjects, meritValue);
     }
 
     public UserPreference getUserPreferences(String userId) {
@@ -166,5 +163,4 @@ public class UserService {
 
         return userMapper.toUserProfile(user);
     }
-
 }

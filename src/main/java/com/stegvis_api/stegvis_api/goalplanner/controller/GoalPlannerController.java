@@ -21,17 +21,19 @@ public class GoalPlannerController {
 
     private final GoalPlannerService goalPlannerService;
 
-    @GetMapping("/merit-value")
-    public ResponseEntity<MeritValueResponse> getMeritValue(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        double meritValue = goalPlannerService.calculateMeriteValueForUser(userPrincipal.getId());
+    // @GetMapping("/merit-value")
+    // public ResponseEntity<MeritValueResponse>
+    // getMeritValue(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    // double meritValue =
+    // goalPlannerService.calculateMeriteValueForUser(userPrincipal.getId());
 
-        MeritValueResponse response = MeritValueResponse.builder()
-                .userId(userPrincipal.getId())
-                .meritValue(meritValue)
-                .build();
+    // MeritValueResponse response = MeritValueResponse.builder()
+    // .userId(userPrincipal.getId())
+    // .meritValue(meritValue)
+    // .build();
 
-        return ResponseEntity.ok(response);
-    }
+    // return ResponseEntity.ok(response);
+    // }
 
     @GetMapping("/enums")
     public Map<String, Object> getAllEnums() {

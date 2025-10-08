@@ -27,7 +27,7 @@ public class UHRService {
 
     public List<EligibleProgramResponse> getEligibleProgramsForUser(String userId, String searchFor) {
         User user = userService.getUserByIdOrThrow(userId);
-        double meritValue = user.getMeritValue();
+        double meritValue = user.getUserPreference().getMeritValue();
 
         String[] senasteTerminer = { "HT24", "VT24", "HT23", "VT23" };
         List<EligibleProgramResponse> eligiblePrograms = new ArrayList<>();

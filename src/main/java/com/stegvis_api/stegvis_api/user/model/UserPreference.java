@@ -23,4 +23,5 @@ public class UserPreference {
     private OrientationPreference orientation;
     private Year year;
     private List<SubjectPreference> subjects;
+    private double meritValue;
 }

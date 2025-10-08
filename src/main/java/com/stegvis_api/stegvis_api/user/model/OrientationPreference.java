@@ -12,7 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrientationPreference {
-
     private String name;
     private String code;
     private int points;

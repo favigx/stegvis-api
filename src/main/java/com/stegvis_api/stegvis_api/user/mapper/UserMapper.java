@@ -4,10 +4,13 @@ import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesGradeDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesGradeResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;
 import com.stegvis_api.stegvis_api.user.model.SubjectPreference;
@@ -20,6 +23,7 @@ public interface UserMapper {
     UserProfileResponse toUserProfile(User user);
 
     @Mapping(target = "subjects", ignore = true)
+    @Mapping(target = "meritValue", ignore = true)
     UserPreference toUserPreference(AddOnboardingPreferencesDTO dto);
 
     AddOnboardingPreferencesResponse toOnboardingPreferencesResponse(UserPreference userPreference);
@@ -33,4 +37,13 @@ public interface UserMapper {
 
     List<AddSubjectPreferencesResponse> toSubjectPreferencesResponses(List<SubjectPreference> subjects);
 
+    @Mapping(target = "courseName", ignore = true)
+    @Mapping(target = "coursePoints", ignore = true)
+    void updateGradeFromDto(AddSubjectPreferencesGradeDTO dto, @MappingTarget SubjectPreference subjectPreference);
+
+    default AddSubjectPreferencesGradeResponse toSubjectPreferencesGradeResponse(
+            List<SubjectPreference> subjects,
+            double meritValue) {
+        return new AddSubjectPreferencesGradeResponse(subjects, meritValue);
+    }
 }
