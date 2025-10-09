@@ -19,4 +19,5 @@ public class SubjectPreference {
     private String courseCode;
     private int coursePoints;
     private Grade grade;
+    private Grade gradeGoal;
 }

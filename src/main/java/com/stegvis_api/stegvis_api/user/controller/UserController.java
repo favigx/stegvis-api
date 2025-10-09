@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
+import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
@@ -66,6 +68,18 @@ public class UserController {
                 AddSubjectPreferencesGradeResponse response = userService.setUserSubjectGrades(
                                 userPrincipal.getId(),
                                 subjectGradesDTOs);
+
+                return ResponseEntity.ok(response);
+        }
+
+        @PutMapping("/preferences/subject-grades/grade-goal")
+        public ResponseEntity<AddGradeGoalResponse> updateUserGradeGoals(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody List<AddGradeGoalDTO> gradeGoalDTOs) {
+
+                AddGradeGoalResponse response = userService.setUserGradeGoal(
+                                userPrincipal.getId(),
+                                gradeGoalDTOs);
 
                 return ResponseEntity.ok(response);
         }

@@ -18,6 +18,8 @@ import com.stegvis_api.stegvis_api.goalplanner.service.MeritCalculatorService;
 import com.stegvis_api.stegvis_api.notes.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
 import com.stegvis_api.stegvis_api.todo.repository.TodoRepository;
+import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
@@ -122,6 +124,35 @@ public class UserService {
         userRepository.save(user);
 
         return userMapper.toSubjectPreferencesGradeResponse(subjects, meritValue);
+    }
+
+    @Transactional
+    public AddGradeGoalResponse setUserGradeGoal(String userId, List<AddGradeGoalDTO> gradeGoalDTOs) {
+        User user = getUserByIdOrThrow(userId);
+
+        UserPreference preference = user.getUserPreference();
+        if (preference == null) {
+            throw new AccessDeniedException("Du måste först genomföra onboarding och registrera dina preferenser");
+        }
+
+        List<SubjectPreference> subjects = preference.getSubjects();
+        if (subjects == null || subjects.isEmpty()) {
+            throw new AccessDeniedException("Du måste registrera dina ämnen och kurser innan du kan sätta betyg");
+        }
+
+        for (AddGradeGoalDTO dto : gradeGoalDTOs) {
+            subjects.stream()
+                    .filter(sp -> sp.getCourseCode().equalsIgnoreCase(dto.courseCode()))
+                    .findFirst()
+                    .ifPresent(sp -> userMapper.updateGradeGoalFromDto(dto, sp));
+        }
+
+        log.info("Updated goal for grades for user id={}", userId);
+
+        userRepository.save(user);
+
+        return userMapper.toAddGradeGoalResponse(subjects);
+
     }
 
     public UserPreference getUserPreferences(String userId) {

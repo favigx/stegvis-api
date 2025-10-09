@@ -6,6 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
@@ -29,6 +31,7 @@ public interface UserMapper {
     AddOnboardingPreferencesResponse toOnboardingPreferencesResponse(UserPreference userPreference);
 
     @Mapping(target = "grade", ignore = true)
+    @Mapping(target = "gradeGoal", ignore = true)
     SubjectPreference toSubjectPreference(AddSubjectPreferencesDTO dto);
 
     AddSubjectPreferencesResponse toSubjectPreferencesResponse(SubjectPreference subjectPreference);
@@ -39,11 +42,22 @@ public interface UserMapper {
 
     @Mapping(target = "courseName", ignore = true)
     @Mapping(target = "coursePoints", ignore = true)
+    @Mapping(target = "gradeGoal", ignore = true)
     void updateGradeFromDto(AddSubjectPreferencesGradeDTO dto, @MappingTarget SubjectPreference subjectPreference);
 
     default AddSubjectPreferencesGradeResponse toSubjectPreferencesGradeResponse(
             List<SubjectPreference> subjects,
             double meritValue) {
         return new AddSubjectPreferencesGradeResponse(subjects, meritValue);
+    }
+
+    @Mapping(target = "courseName", ignore = true)
+    @Mapping(target = "coursePoints", ignore = true)
+    @Mapping(target = "grade", ignore = true)
+    void updateGradeGoalFromDto(AddGradeGoalDTO dto, @MappingTarget SubjectPreference subjectPreference);
+
+    default AddGradeGoalResponse toAddGradeGoalResponse(
+            List<SubjectPreference> subjects) {
+        return new AddGradeGoalResponse(subjects);
     }
 }
