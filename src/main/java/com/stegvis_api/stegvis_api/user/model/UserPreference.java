@@ -24,4 +24,5 @@ public class UserPreference {
     private Year year;
     private List<SubjectPreference> subjects;
     private double meritValue;
+    private double meritValueBasedOnGoal;
 }

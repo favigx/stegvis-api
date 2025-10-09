@@ -26,6 +26,7 @@ public interface UserMapper {
 
     @Mapping(target = "subjects", ignore = true)
     @Mapping(target = "meritValue", ignore = true)
+    @Mapping(target = "meritValueBasedOnGoal", ignore = true)
     UserPreference toUserPreference(AddOnboardingPreferencesDTO dto);
 
     AddOnboardingPreferencesResponse toOnboardingPreferencesResponse(UserPreference userPreference);
@@ -57,7 +58,7 @@ public interface UserMapper {
     void updateGradeGoalFromDto(AddGradeGoalDTO dto, @MappingTarget SubjectPreference subjectPreference);
 
     default AddGradeGoalResponse toAddGradeGoalResponse(
-            List<SubjectPreference> subjects) {
-        return new AddGradeGoalResponse(subjects);
+            List<SubjectPreference> subjects, double meritValueBasedOnGoal) {
+        return new AddGradeGoalResponse(subjects, meritValueBasedOnGoal);
     }
 }

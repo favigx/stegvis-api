@@ -50,4 +50,33 @@ public class MeritCalculatorService {
 
         return Math.round((totalWeighted / totalPoints) * 100.0) / 100.0;
     }
+
+    public double calculateMeritValueFromGoals(User user) {
+        UserPreference preference = user.getUserPreference();
+        if (preference == null || preference.getSubjects() == null || preference.getSubjects().isEmpty()) {
+            return 0.0;
+        }
+        return calculateMeritValueFromGoalSubjects(preference.getSubjects());
+    }
+
+    public double calculateMeritValueFromGoalSubjects(List<SubjectPreference> subjects) {
+        double totalPoints = 0;
+        double totalWeighted = 0;
+
+        for (SubjectPreference sp : subjects) {
+            if (sp.getGradeGoal() == null)
+                continue;
+
+            double gradeValue = GRADE_VALUES.getOrDefault(sp.getGradeGoal(), 0.0);
+            double coursePoints = sp.getCoursePoints();
+
+            totalPoints += coursePoints;
+            totalWeighted += gradeValue * coursePoints;
+        }
+
+        if (totalPoints == 0)
+            return 0.0;
+
+        return Math.round((totalWeighted / totalPoints) * 100.0) / 100.0;
+    }
 }

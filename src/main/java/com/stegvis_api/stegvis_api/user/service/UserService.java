@@ -147,11 +147,14 @@ public class UserService {
                     .ifPresent(sp -> userMapper.updateGradeGoalFromDto(dto, sp));
         }
 
+        double meritValueBasedOnGoal = meritCalculatorService.calculateMeritValueFromGoalSubjects(subjects);
+        user.getUserPreference().setMeritValueBasedOnGoal(meritValueBasedOnGoal);
+
         log.info("Updated goal for grades for user id={}", userId);
 
         userRepository.save(user);
 
-        return userMapper.toAddGradeGoalResponse(subjects);
+        return userMapper.toAddGradeGoalResponse(subjects, meritValueBasedOnGoal);
 
     }
 
