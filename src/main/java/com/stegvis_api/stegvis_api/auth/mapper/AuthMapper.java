@@ -17,6 +17,8 @@ public interface AuthMapper {
     @Mapping(target = "userPreference", ignore = true)
     @Mapping(target = "stripeCustomerId", ignore = true)
     @Mapping(target = "hasCompletedOnboarding", ignore = true)
+    @Mapping(target = "googleLinked", ignore = true)
+    @Mapping(target = "googleOathCredentials", ignore = true)
     User toUser(UserRegistrationDTO dto);
 
     UserRegistrationResponse toUserRegistrationResponse(User user);

@@ -49,7 +49,7 @@ public class JwtTokenService {
                 .secure(true)
                 .path("/")
                 .maxAge(jwtExpirationMs / 1000)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
 
@@ -62,7 +62,7 @@ public class JwtTokenService {
                 .secure(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
 

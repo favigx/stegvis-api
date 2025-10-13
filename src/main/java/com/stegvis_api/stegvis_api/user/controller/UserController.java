@@ -24,6 +24,7 @@ import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesGradeResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
 import com.stegvis_api.stegvis_api.user.dto.GetUserPreferenceResponse;
+import com.stegvis_api.stegvis_api.user.dto.UserAuthResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
 import com.stegvis_api.stegvis_api.user.service.UserService;
@@ -121,5 +122,23 @@ public class UserController {
                 UserProfileResponse profile = userService.getUserProfileDetails(userPrincipal.getId());
 
                 return ResponseEntity.ok(profile);
+        }
+
+        @GetMapping("/check")
+        public ResponseEntity<UserAuthResponse> checkAuthentication(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+                if (userPrincipal == null) {
+                        return ResponseEntity.ok(
+                                        UserAuthResponse.builder()
+                                                        .id(null)
+                                                        .user(null)
+                                                        .isAuthenticated(false)
+                                                        .hasCompletedOnboarding(false)
+                                                        .build());
+                }
+
+                UserAuthResponse response = userService.checkAuth(userPrincipal.getId());
+                return ResponseEntity.ok(response);
         }
 }

@@ -27,6 +27,7 @@ import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesGradeDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesGradeResponse;
 import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
+import com.stegvis_api.stegvis_api.user.dto.UserAuthResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;
 import com.stegvis_api.stegvis_api.user.mapper.UserMapper;
 import com.stegvis_api.stegvis_api.user.model.SubjectPreference;
@@ -196,5 +197,17 @@ public class UserService {
         log.info("Successfully fetched profile for userId={}", userId);
 
         return userMapper.toUserProfile(user);
+    }
+
+    public UserAuthResponse checkAuth(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return UserAuthResponse.builder()
+                .id(user.getId())
+                .user(user.getEmail())
+                .isAuthenticated(true)
+                .hasCompletedOnboarding(user.isHasCompletedOnboarding())
+                .build();
     }
 }

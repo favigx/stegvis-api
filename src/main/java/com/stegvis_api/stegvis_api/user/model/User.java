@@ -1,7 +1,5 @@
 package com.stegvis_api.stegvis_api.user.model;
 
-import java.util.List;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -34,4 +32,6 @@ public class User {
     private UserPreference userPreference;
     private boolean hasCompletedOnboarding;
     private String stripeCustomerId;
+    private boolean googleLinked;
+    private OathCredentials googleOathCredentials;
 }
