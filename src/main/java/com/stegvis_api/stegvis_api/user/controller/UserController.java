@@ -13,8 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
+import com.stegvis_api.stegvis_api.user.dto.AddGradeForCurrentDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddGradeForCurrentResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalResponse;
+import com.stegvis_api.stegvis_api.user.dto.AddGradedSubjectsDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddGradedSubjectsResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
@@ -61,7 +65,30 @@ public class UserController {
                 return ResponseEntity.ok(responses);
         }
 
+        @PutMapping("/preferences/gradedsubjects")
+        public ResponseEntity<List<AddGradedSubjectsResponse>> updateUserGradedSubjects(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody List<AddGradedSubjectsDTO> gradedSubjectsDTOs) {
+
+                List<AddGradedSubjectsResponse> responses = userService
+                                .setUserGradedSubjects(gradedSubjectsDTOs, userPrincipal.getId());
+
+                return ResponseEntity.ok(responses);
+        }
+
         @PutMapping("/preferences/subject-grades")
+        public ResponseEntity<AddGradeForCurrentResponse> updateUserSubjectGradesForCurrent(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody List<AddGradeForCurrentDTO> subjectGradesDTOs) {
+
+                AddGradeForCurrentResponse response = userService.setUserSubjectGradesForCurrent(
+                                userPrincipal.getId(),
+                                subjectGradesDTOs);
+
+                return ResponseEntity.ok(response);
+        }
+
+        @PutMapping("/preferences/subject-grades/existing")
         public ResponseEntity<AddSubjectPreferencesGradeResponse> updateUserSubjectGrades(
                         @AuthenticationPrincipal UserPrincipal userPrincipal,
                         @RequestBody List<AddSubjectPreferencesGradeDTO> subjectGradesDTOs) {

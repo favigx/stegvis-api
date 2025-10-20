@@ -1,0 +1,14 @@
+Skapa ett quiz baserat på följande anteckning.
+Svara endast i strikt JSON enligt formatet nedan, utan någon extra text:
+
+[
+  {
+    "question": "Fråga",
+    "options": [
+      { "optionText": "Svar A", "points": 1, "isCorrect": false },
+      { "optionText": "Svar B", "points": 1, "isCorrect": true },
+      { "optionText": "Svar C", "points": 1, "isCorrect": false },
+      { "optionText": "Svar D", "points": 1, "isCorrect": false }
+    ]
+  }
+]

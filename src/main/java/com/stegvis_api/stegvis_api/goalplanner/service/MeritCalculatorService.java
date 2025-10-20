@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.stegvis_api.stegvis_api.goalplanner.enums.Grade;
+import com.stegvis_api.stegvis_api.user.model.GradedSubject;
 import com.stegvis_api.stegvis_api.user.model.SubjectPreference;
 import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
@@ -23,18 +24,18 @@ public class MeritCalculatorService {
 
     public double calculateMeritValue(User user) {
         UserPreference preference = user.getUserPreference();
-        if (preference == null || preference.getSubjects() == null || preference.getSubjects().isEmpty()) {
+        if (preference == null || preference.getGradedSubjects() == null || preference.getGradedSubjects().isEmpty()) {
             return 0.0;
         }
 
-        return calculateMeritValueFromSubjects(preference.getSubjects());
+        return calculateMeritValueFromSubjects(preference.getGradedSubjects());
     }
 
-    public double calculateMeritValueFromSubjects(List<SubjectPreference> subjects) {
+    public double calculateMeritValueFromSubjects(List<GradedSubject> subjects) {
         double totalPoints = 0;
         double totalWeighted = 0;
 
-        for (SubjectPreference sp : subjects) {
+        for (GradedSubject sp : subjects) {
             if (sp.getGrade() == null)
                 continue;
 

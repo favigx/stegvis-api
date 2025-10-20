@@ -23,6 +23,7 @@ public class UserPreference {
     private OrientationPreference orientation;
     private Year year;
     private List<SubjectPreference> subjects;
+    private List<GradedSubject> gradedSubjects;
     private double meritValue;
     private double meritValueBasedOnGoal;
 }

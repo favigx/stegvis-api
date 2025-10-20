@@ -62,7 +62,7 @@ public class NoteController {
                         @RequestBody EditNoteDTO editNoteDTO,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                EditNoteResponse response = noteService.editNote(noteId, editNoteDTO, noteId);
+                EditNoteResponse response = noteService.editNote(noteId, editNoteDTO, userPrincipal.getId());
 
                 return ResponseEntity.ok(response);
         }

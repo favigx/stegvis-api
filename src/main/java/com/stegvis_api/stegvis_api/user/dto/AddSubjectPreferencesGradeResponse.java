@@ -2,9 +2,9 @@ package com.stegvis_api.stegvis_api.user.dto;
 
 import java.util.List;
 
-import com.stegvis_api.stegvis_api.user.model.SubjectPreference;
+import com.stegvis_api.stegvis_api.user.model.GradedSubject;
 
 public record AddSubjectPreferencesGradeResponse(
-        List<SubjectPreference> subjects,
-        double meritValue) {
+                List<GradedSubject> subjects,
+                double meritValue) {
 }

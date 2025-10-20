@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,12 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.stegvis_api.stegvis_api.calender.deadline.repository.TaskRepository;
 import com.stegvis_api.stegvis_api.exception.type.ResourceNotFoundException;
+import com.stegvis_api.stegvis_api.goalplanner.enums.Grade;
 import com.stegvis_api.stegvis_api.goalplanner.service.MeritCalculatorService;
 import com.stegvis_api.stegvis_api.notes.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
 import com.stegvis_api.stegvis_api.todo.repository.TodoRepository;
+import com.stegvis_api.stegvis_api.user.dto.AddGradeForCurrentDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddGradeForCurrentResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalResponse;
+import com.stegvis_api.stegvis_api.user.dto.AddGradedSubjectsDTO;
+import com.stegvis_api.stegvis_api.user.dto.AddGradedSubjectsResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddOnboardingPreferencesResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddSubjectPreferencesDTO;
@@ -30,10 +36,12 @@ import com.stegvis_api.stegvis_api.user.dto.DeleteUserResult;
 import com.stegvis_api.stegvis_api.user.dto.UserAuthResponse;
 import com.stegvis_api.stegvis_api.user.dto.UserProfileResponse;
 import com.stegvis_api.stegvis_api.user.mapper.UserMapper;
+import com.stegvis_api.stegvis_api.user.model.GradedSubject;
 import com.stegvis_api.stegvis_api.user.model.SubjectPreference;
 import com.stegvis_api.stegvis_api.user.model.User;
 import com.stegvis_api.stegvis_api.user.model.UserPreference;
 import com.stegvis_api.stegvis_api.user.repository.UserRepository;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -91,6 +99,87 @@ public class UserService {
     }
 
     @Transactional
+    public List<AddGradedSubjectsResponse> setUserGradedSubjects(
+            List<AddGradedSubjectsDTO> dtos, String userId) {
+
+        User user = getUserByIdOrThrow(userId);
+
+        if (user.getUserPreference().getGradedSubjects() == null) {
+            user.getUserPreference().setGradedSubjects(new ArrayList<>());
+        }
+
+        List<GradedSubject> incomingSubjects = userMapper.toGradedSubjects(dtos);
+
+        Set<String> existingCourseCodes = user.getUserPreference().getGradedSubjects()
+                .stream()
+                .map(GradedSubject::getCourseCode)
+                .collect(Collectors.toSet());
+
+        List<GradedSubject> subjectsToAdd = incomingSubjects.stream()
+                .filter(s -> !existingCourseCodes.contains(s.getCourseCode()))
+                .collect(Collectors.toList());
+
+        user.getUserPreference().getGradedSubjects().addAll(subjectsToAdd);
+        userRepository.save(user);
+
+        return userMapper.toGradedSubjectsResponse(subjectsToAdd);
+
+    }
+
+    @Transactional
+    public AddGradeForCurrentResponse setUserSubjectGradesForCurrent(String userId,
+            List<AddGradeForCurrentDTO> dtos) {
+
+        User user = getUserByIdOrThrow(userId);
+        UserPreference preference = user.getUserPreference();
+
+        if (preference == null) {
+            throw new AccessDeniedException("Du måste först genomföra onboarding och registrera dina preferenser");
+        }
+
+        if (Year.YEAR_1.equals(preference.getYear())) {
+            throw new AccessDeniedException("Användare i YEAR_1 får inte sätta betyg ännu");
+        }
+
+        List<SubjectPreference> subjects = preference.getSubjects();
+        if (subjects == null || subjects.isEmpty()) {
+            throw new AccessDeniedException("Du måste registrera dina ämnen och kurser innan du kan sätta betyg");
+        }
+
+        Map<String, Grade> dtoMap = dtos.stream()
+                .collect(Collectors.toMap(AddGradeForCurrentDTO::courseCode, AddGradeForCurrentDTO::grade));
+
+        subjects.forEach(sp -> {
+            Grade newGrade = dtoMap.get(sp.getCourseCode());
+            if (newGrade != null) {
+                sp.setGrade(newGrade);
+            }
+        });
+
+        List<GradedSubject> newlyGraded = subjects.stream()
+                .map(SubjectPreference::toGradedSubject)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (preference.getGradedSubjects() == null) {
+            preference.setGradedSubjects(newlyGraded);
+        } else {
+            preference.getGradedSubjects().addAll(newlyGraded);
+        }
+
+        List<SubjectPreference> remainingSubjects = subjects.stream()
+                .filter(sp -> sp.getGrade() == null)
+                .collect(Collectors.toList());
+        preference.setSubjects(remainingSubjects);
+
+        log.info("Updated subject grades for user id={}", userId);
+
+        userRepository.save(user);
+
+        return new AddGradeForCurrentResponse(preference.getSubjects());
+    }
+
+    @Transactional
     public AddSubjectPreferencesGradeResponse setUserSubjectGrades(String userId,
             List<AddSubjectPreferencesGradeDTO> dtos) {
         User user = getUserByIdOrThrow(userId);
@@ -105,10 +194,7 @@ public class UserService {
             throw new AccessDeniedException("Användare i YEAR_1 får inte sätta betyg ännu");
         }
 
-        List<SubjectPreference> subjects = preference.getSubjects();
-        if (subjects == null || subjects.isEmpty()) {
-            throw new AccessDeniedException("Du måste registrera dina ämnen och kurser innan du kan sätta betyg");
-        }
+        List<GradedSubject> subjects = preference.getGradedSubjects();
 
         for (AddSubjectPreferencesGradeDTO dto : dtos) {
             subjects.stream()
