@@ -7,7 +7,5 @@ import com.stegvis_api.stegvis_api.integration.openai.model.AiChatRequest;
 import com.stegvis_api.stegvis_api.integration.openai.model.AiChatResponse;
 
 public interface OpenAiHttpClient {
-
-    @PostExchange("/chat/completions")
-    AiChatResponse createChatCompletion(@RequestBody AiChatRequest request);
+    AiChatResponse createChatCompletion(AiChatRequest request);
 }

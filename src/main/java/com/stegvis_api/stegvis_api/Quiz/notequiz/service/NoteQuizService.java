@@ -35,42 +35,38 @@ public class NoteQuizService {
 
     @Transactional
     public NoteQuizResponse generateNoteQuiz(String noteId, String userId) throws Exception {
-
         Note note = noteRepository.findByIdAndUserId(noteId, userId)
                 .orElseThrow(() -> new RuntimeException("Note hittades inte för användare"));
 
         String aiQuizContent = openAiNoteQuizService.generateNoteQuiz(note);
 
-        List<Questions> questions = parseAiQuizContent(aiQuizContent);
-
-        NoteQuiz noteQuiz = new NoteQuiz();
-        noteQuiz.setUserId(userId);
-        noteQuiz.setQuizName("Quiz för: " + note.getSubject());
+        NoteQuiz noteQuiz = parseAiQuizContent(aiQuizContent, userId);
         noteQuiz.setCourseName(note.getSubject());
-        noteQuiz.setQuestions(questions);
 
         NoteQuiz savedQuiz = noteQuizRepository.save(noteQuiz);
 
         return noteQuizMapper.toNoteQuizResponse(savedQuiz);
     }
 
-    private List<Questions> parseAiQuizContent(String aiQuizContent) throws Exception {
+    private NoteQuiz parseAiQuizContent(String aiQuizContent, String userId) throws Exception {
         if (aiQuizContent == null || aiQuizContent.isBlank()) {
             throw new IllegalArgumentException("AI-svaret är tomt");
         }
 
-        int startIndex = aiQuizContent.indexOf('[');
-        int endIndex = aiQuizContent.lastIndexOf(']');
-
-        if (startIndex == -1 || endIndex == -1 || startIndex > endIndex) {
-            throw new IllegalArgumentException("AI-svaret innehåller ingen giltig JSON-lista");
-        }
-
-        String json = aiQuizContent.substring(startIndex, endIndex + 1);
-
         try {
-            return objectMapper.readValue(json, new TypeReference<List<Questions>>() {
-            });
+            var jsonNode = objectMapper.readTree(aiQuizContent);
+            String quizName = jsonNode.has("quizName") ? jsonNode.get("quizName").asText() : "Allmänt quiz";
+
+            List<Questions> questions = objectMapper.readValue(
+                    jsonNode.get("questions").toString(),
+                    new TypeReference<List<Questions>>() {
+                    });
+
+            NoteQuiz noteQuiz = new NoteQuiz();
+            noteQuiz.setUserId(userId);
+            noteQuiz.setQuizName(quizName);
+            noteQuiz.setQuestions(questions);
+            return noteQuiz;
         } catch (Exception e) {
             throw new RuntimeException("Misslyckades med att parsa AI JSON-svar", e);
         }

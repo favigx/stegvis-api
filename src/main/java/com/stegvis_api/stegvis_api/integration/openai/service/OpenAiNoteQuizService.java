@@ -20,42 +20,44 @@ public class OpenAiNoteQuizService {
 
   private final OpenAiHttpClient openAiHttpClient;
 
-  /**
-   * Bygger request till OpenAI med strikt JSON-prompt som instruerar AI:
-   * - Skapa quiz baserat på anteckningen
-   * - Markera exakt ett korrekt svar per fråga
-   * - Svara endast med JSON
-   */
   private AiChatRequest buildNoteQuizRequest(String model, Note note) {
     String systemPrompt = """
+        Du är en expert på att skapa pedagogiska quiz på svenska.
+
         Skapa ett flervalsquiz baserat på följande anteckning.
-        Varje fråga ska ha exakt ett korrekt svar markerat med "isCorrect": true.
-        Använd endast fakta som finns i anteckningen.
-        Svara endast i strikt JSON enligt formatet nedan, utan någon annan text.
+
+        Krav:
+        - Quizet ska ha ett tydligt namn baserat på innehållet i anteckningen.
+        - Använd **inte** ämnets eller kursens namn i quiz-namnet (t.ex. "Engelska 5").
+        - Quiz-namnet ska vara kort, beskrivande och avslutas med ordet "quiz".
+        - Svara ENDAST i strikt JSON enligt formatet nedan (ingen extra text före eller efter).
+
+        JSON-format:
+        {
+          "quizName": "Quiznamn utan ämne",
+          "questions": [
+            {
+              "question": "Fråga",
+              "options": [
+                { "optionText": "Svar A", "points": 0, "isCorrect": false },
+                { "optionText": "Svar B", "points": 1, "isCorrect": true },
+                { "optionText": "Svar C", "points": 0, "isCorrect": false },
+                { "optionText": "Svar D", "points": 0, "isCorrect": false }
+              ]
+            }
+          ]
+        }
 
         Anteckning:
         Ämne: %s
         Innehåll: %s
-
-        JSON-format:
-        [
-          {
-            "question": "Fråga",
-            "options": [
-              { "optionText": "Svar A", "points": 0, "isCorrect": false },
-              { "optionText": "Svar B", "points": 1, "isCorrect": true },
-              { "optionText": "Svar C", "points": 0, "isCorrect": false },
-              { "optionText": "Svar D", "points": 0, "isCorrect": false }
-            ]
-          }
-        ]
         """.formatted(note.getSubject(), note.getNote());
 
     return AiChatRequest.builder()
         .model(model)
         .messages(List.of(
             new AiMessage("system", systemPrompt),
-            new AiMessage("user", "Skapa quiz enligt ovan instruktioner")))
+            new AiMessage("user", "Skapa quiz enligt instruktionerna ovan.")))
         .n(1)
         .build();
   }
