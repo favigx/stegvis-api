@@ -39,10 +39,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (path.startsWith("/api/auth/login") ||
                 path.startsWith("/api/auth/register") ||
                 path.startsWith("/api/auth/refresh") ||
-                path.startsWith("/api/stripe/webhook") ||
-                path.startsWith("/login") ||
-                path.startsWith("/api/oauth2") ||
-                path.startsWith("/login/oauth2")) {
+                path.startsWith("/api/stripe/webhook")
+        // || path.startsWith("/api/oauth2") // Kommenterad bort
+        // || path.startsWith("/login/oauth2") // Kommenterad bort
+        ) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -59,8 +59,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 String userId = jwtTokenService.validateAndGetUserId(token);
                 UserPrincipal userPrincipal = (UserPrincipal) userDetailsService.loadUserById(userId);
 
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userPrincipal, null,
-                        userPrincipal.getAuthorities());
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        userPrincipal, null, userPrincipal.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
@@ -73,6 +73,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
+
         filterChain.doFilter(request, response);
     }
 

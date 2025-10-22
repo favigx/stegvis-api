@@ -1,28 +1,23 @@
 package com.stegvis_api.stegvis_api.config.security;
 
-import com.stegvis_api.stegvis_api.auth.service.AuthService;
-import com.stegvis_api.stegvis_api.auth.service.OAuthService;
+// import com.stegvis_api.stegvis_api.auth.service.AuthService;
+// import com.stegvis_api.stegvis_api.auth.service.OAuthService;
 import com.stegvis_api.stegvis_api.config.security.jwt.JwtTokenFilter;
-import com.stegvis_api.stegvis_api.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.util.Set;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
         private final JwtTokenFilter jwtTokenFilter;
-        private final OAuthService oAuthService;
-        private final AuthService authService;
+        // private final OAuthService oAuthService;
+        // private final AuthService authService;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,39 +26,42 @@ public class SecurityConfig {
                                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(
-                                                                "/api/auth/**",
-                                                                "/api/oauth2/**",
-                                                                "/login/oauth2/**")
-                                                .permitAll()
+                                                                "/api/auth/**"
+                                                // "/api/oauth2/**",
+                                                // "/login/oauth2/**"
+                                                ).permitAll()
                                                 .anyRequest().authenticated())
-                                .oauth2Login(oauth -> oauth
-                                                .successHandler(oAuth2SuccessHandler()))
+                                // .oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler())) //
+                                // Kommenterad bort
                                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
         }
 
-        @Bean
-        public AuthenticationSuccessHandler oAuth2SuccessHandler() {
-                return (request, response, authentication) -> {
-                        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-                        var attributes = oauthToken.getPrincipal().getAttributes();
-
-                        String provider = "google";
-                        String oauthId = (String) attributes.get("sub");
-                        String email = (String) attributes.get("email");
-                        String firstName = (String) attributes.get("given_name");
-                        String lastName = (String) attributes.get("family_name");
-                        Set<String> scopes = Set.of("openid", "profile", "email");
-
-                        User user = oAuthService.findByEmail(email)
-                                        .map(existingUser -> oAuthService.linkOAuthToUser(existingUser, provider,
-                                                        oauthId, scopes))
-                                        .orElseGet(() -> oAuthService.createNewOAuthUser(email, provider, oauthId,
-                                                        scopes, firstName, lastName));
-
-                        authService.setTokens(user, response);
-                        response.sendRedirect("http://localhost:5173/oauth2/success");
-                };
-        }
+        /*
+         * @Bean
+         * public AuthenticationSuccessHandler oAuth2SuccessHandler() {
+         * return (request, response, authentication) -> {
+         * OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken)
+         * authentication;
+         * var attributes = oauthToken.getPrincipal().getAttributes();
+         * 
+         * String provider = "google";
+         * String oauthId = (String) attributes.get("sub");
+         * String email = (String) attributes.get("email");
+         * String firstName = (String) attributes.get("given_name");
+         * String lastName = (String) attributes.get("family_name");
+         * Set<String> scopes = Set.of("openid", "profile", "email");
+         * 
+         * User user = oAuthService.findByEmail(email)
+         * .map(existingUser -> oAuthService.linkOAuthToUser(existingUser, provider,
+         * oauthId, scopes))
+         * .orElseGet(() -> oAuthService.createNewOAuthUser(email, provider, oauthId,
+         * scopes, firstName, lastName));
+         * 
+         * authService.setTokens(user, response);
+         * response.sendRedirect("http://localhost:5173/oauth2/success");
+         * };
+         * }
+         */
 }
