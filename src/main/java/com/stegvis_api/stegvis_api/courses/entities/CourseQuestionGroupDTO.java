@@ -3,7 +3,6 @@ package com.stegvis_api.stegvis_api.courses.entities;
 import java.util.List;
 
 import com.stegvis_api.stegvis_api.courses.model.CourseQuestion;
-import com.stegvis_api.stegvis_api.courses.model.CourseQuestionGroup;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
