@@ -9,6 +9,7 @@ import com.stegvis_api.stegvis_api.courses.services.CoursesService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -20,8 +21,8 @@ public class CoursesConroller {
     private CoursesService service;
 
     @GetMapping("/{course}")
-    public CourseDTO getCourse(@PathVariable Courses course) {
-        return service.getCourse(course);
+    public ResponseEntity<CourseDTO> getCourse(@PathVariable Courses course) {
+        return ResponseEntity.ok(service.getCourse(course));
     }
 
 }
