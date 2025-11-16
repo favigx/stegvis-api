@@ -22,7 +22,7 @@ public class CoursesConroller {
 
     @GetMapping("/{course}")
     public ResponseEntity<CourseDTO> getCourse(@PathVariable Courses course) {
-        return ResponseEntity.ok(service.getCourse(course));
+        return ResponseEntity.ok(service.getCourseLevel(course));
     }
 
 }

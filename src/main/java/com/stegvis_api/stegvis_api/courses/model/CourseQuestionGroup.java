@@ -1,7 +1,7 @@
 package com.stegvis_api.stegvis_api.courses.model;
 
-
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -20,6 +20,8 @@ public class CourseQuestionGroup {
     @Id
     private final String id;
     private final Courses course;
+    private final long level;
     private final String label;
-    private final List<CourseQuestion> questions;
+    private final boolean hasQuestions;
+    private final Optional<List<CourseQuestion>> questions;
 }

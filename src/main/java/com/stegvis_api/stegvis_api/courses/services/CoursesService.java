@@ -19,8 +19,9 @@ public class CoursesService {
 
     private CourseQuestionGroupRepository repository;
 
-    public CourseDTO getCourse(Courses course) {
+    public CourseDTO getCourseLevel(final Courses course) {
         List<CourseQuestionGroup> groups = repository.findByCourse(course);
+
         return CourseDTO.builder()
                 .course(course)
                 .questiongroups(groups)
