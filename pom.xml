@@ -126,7 +126,17 @@
     <artifactId>bcprov-jdk18on</artifactId>
     <version>1.81</version>
 </dependency>
-    </dependencies>
+
+    <!-- Needed for mac?-->
+    <dependency>
+    <groupId>io.netty</groupId>
+    <artifactId>netty-resolver-dns-native-macos</artifactId>
+    <version>${netty.version}</version>
+    <scope>runtime</scope>
+    <classifier>osx-aarch_64</classifier> 
+    </dependency>
+</dependencies>
+
     <build>
         <plugins>
             <!-- Spring Boot Plugin -->
