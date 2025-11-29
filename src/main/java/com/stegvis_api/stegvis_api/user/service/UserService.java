@@ -62,13 +62,20 @@ public class UserService {
         UserPreference userPreference = userMapper.toUserPreference(dto);
 
         user.setUserPreference(userPreference);
-        user.setHasCompletedOnboarding(true);
 
         userRepository.save(user);
 
         log.debug("Set onboarding preferences for user id={}", userId);
 
         return userMapper.toOnboardingPreferencesResponse(userPreference);
+    }
+
+    @Transactional
+    public void markOnboardingComplete(String userId) {
+        User user = getUserByIdOrThrow(userId);
+        user.setHasCompletedOnboarding(true);
+        userRepository.save(user);
+        log.info("Marked onboarding as complete for user id={}", userId);
     }
 
     @Transactional
