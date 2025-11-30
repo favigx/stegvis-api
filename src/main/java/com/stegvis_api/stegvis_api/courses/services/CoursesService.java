@@ -1,19 +1,11 @@
 package com.stegvis_api.stegvis_api.courses.services;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.stegvis_api.stegvis_api.courses.entities.CourseDTO;
 import com.stegvis_api.stegvis_api.courses.mappers.CourseMapper;
 import com.stegvis_api.stegvis_api.courses.model.Course;
-import com.stegvis_api.stegvis_api.courses.model.CourseAlternative;
-import com.stegvis_api.stegvis_api.courses.model.CourseQuestion;
-import com.stegvis_api.stegvis_api.courses.model.CourseQuestionGroup;
 import com.stegvis_api.stegvis_api.courses.model.enums.CourseLevel;
-import com.stegvis_api.stegvis_api.courses.model.requests.CourseAlternativeRequest;
-import com.stegvis_api.stegvis_api.courses.model.requests.CourseQuestionGroupRequest;
-import com.stegvis_api.stegvis_api.courses.model.requests.CourseQuestionRequest;
 import com.stegvis_api.stegvis_api.courses.model.requests.CreateCourseRequest;
 import com.stegvis_api.stegvis_api.courses.model.enums.AvailableCourses;
 import com.stegvis_api.stegvis_api.courses.repositories.CoursesRepository;
