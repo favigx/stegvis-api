@@ -10,23 +10,23 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.stegvis_api.stegvis_api.config.security.UserPrincipal;
 import com.stegvis_api.stegvis_api.todo.dto.*;
-import com.stegvis_api.stegvis_api.todo.service.TodoService;
+import com.stegvis_api.stegvis_api.todo.service.TodoBoardService;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/todo")
-public class TodoController {
+public class TodoBoardController {
 
-        private final TodoService todoService;
+        private final TodoBoardService todoBoardService;
 
         @PostMapping
         public ResponseEntity<AddTodoResponse> createTodo(
                         @RequestBody AddTodoDTO addTodoDTO,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                AddTodoResponse response = todoService.createTodo(addTodoDTO, userPrincipal.getId());
+                AddTodoResponse response = todoBoardService.createTodo(addTodoDTO, userPrincipal.getId());
 
                 URI location = ServletUriComponentsBuilder
                                 .fromCurrentRequest()
@@ -41,7 +41,7 @@ public class TodoController {
         public ResponseEntity<List<TodoResponse>> getMyTodos(
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                List<TodoResponse> dtoList = todoService.getAllTodosForUser(userPrincipal.getId());
+                List<TodoResponse> dtoList = todoBoardService.getAllTodosForUser(userPrincipal.getId());
 
                 return ResponseEntity.ok(dtoList);
         }
@@ -51,8 +51,24 @@ public class TodoController {
                         @PathVariable String todoId,
                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                DeleteTodoResponse response = todoService.deleteTodoById(todoId, userPrincipal.getId());
+                DeleteTodoResponse response = todoBoardService.deleteTodoById(todoId, userPrincipal.getId());
 
                 return ResponseEntity.ok(response);
+        }
+
+        @PutMapping("/{todoId}/ongoing")
+        public ResponseEntity<Void> markTodoOngoing(
+                        @PathVariable String todoId,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+                todoBoardService.markTodoOngoing(todoId, userPrincipal.getId());
+                return ResponseEntity.noContent().build();
+        }
+
+        @PutMapping("/{todoId}/completed")
+        public ResponseEntity<Void> markTodoCompleted(
+                        @PathVariable String todoId,
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+                todoBoardService.markTodoCompleted(todoId, userPrincipal.getId());
+                return ResponseEntity.noContent().build();
         }
 }

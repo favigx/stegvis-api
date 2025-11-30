@@ -54,6 +54,15 @@ public class UserController {
                 return ResponseEntity.ok(response);
         }
 
+        @PutMapping("/preferences/onboarding-complete")
+        public ResponseEntity<Void> markOnboardingComplete(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+                userService.markOnboardingComplete(userPrincipal.getId());
+
+                return ResponseEntity.ok().build();
+        }
+
         @PutMapping("/preferences/subjects")
         public ResponseEntity<List<AddSubjectPreferencesResponse>> updateUserSubjectPreferences(
                         @AuthenticationPrincipal UserPrincipal userPrincipal,

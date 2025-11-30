@@ -19,7 +19,7 @@ import com.stegvis_api.stegvis_api.goalplanner.enums.Grade;
 import com.stegvis_api.stegvis_api.goalplanner.service.MeritCalculatorService;
 import com.stegvis_api.stegvis_api.notes.repository.NoteRepository;
 import com.stegvis_api.stegvis_api.onboarding.enums.Year;
-import com.stegvis_api.stegvis_api.todo.repository.TodoRepository;
+import com.stegvis_api.stegvis_api.todo.repository.TodoBoardRepository;
 import com.stegvis_api.stegvis_api.user.dto.AddGradeForCurrentDTO;
 import com.stegvis_api.stegvis_api.user.dto.AddGradeForCurrentResponse;
 import com.stegvis_api.stegvis_api.user.dto.AddGradeGoalDTO;
@@ -51,7 +51,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final NoteRepository noteRepository;
     private final TaskRepository taskRepository;
-    private final TodoRepository todoRepository;
+    private final TodoBoardRepository todoRepository;
     private final MeritCalculatorService meritCalculatorService;
     private final UserMapper userMapper;
 
@@ -62,13 +62,20 @@ public class UserService {
         UserPreference userPreference = userMapper.toUserPreference(dto);
 
         user.setUserPreference(userPreference);
-        user.setHasCompletedOnboarding(true);
 
         userRepository.save(user);
 
         log.debug("Set onboarding preferences for user id={}", userId);
 
         return userMapper.toOnboardingPreferencesResponse(userPreference);
+    }
+
+    @Transactional
+    public void markOnboardingComplete(String userId) {
+        User user = getUserByIdOrThrow(userId);
+        user.setHasCompletedOnboarding(true);
+        userRepository.save(user);
+        log.info("Marked onboarding as complete for user id={}", userId);
     }
 
     @Transactional
