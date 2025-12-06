@@ -135,6 +135,23 @@
     <scope>runtime</scope>
     <classifier>osx-aarch_64</classifier> 
     </dependency>
+
+        <!--Files -->
+     <dependency>
+  <groupId>commons-io</groupId>
+  <artifactId>commons-io</artifactId>
+  <version>2.21.0</version>
+</dependency>
+
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-s3</artifactId>
+    <version>1.12.612</version>
+</dependency>
+
+
+
+
 </dependencies>
 
     <build>
