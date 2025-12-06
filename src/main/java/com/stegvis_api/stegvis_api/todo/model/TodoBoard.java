@@ -1,6 +1,7 @@
 package com.stegvis_api.stegvis_api.todo.model;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -35,4 +36,7 @@ public class TodoBoard {
     private Instant dateTimeCreated = Instant.now();
 
     private Instant dateTimeCompleted;
+    private int durationDays;
+    private List<TodoFile> attachments;
+    private List<String> links;
 }

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import com.stegvis_api.stegvis_api.todo.enums.TodoStatus;
 import com.stegvis_api.stegvis_api.todo.model.TodoBoard;
 
 public interface TodoBoardRepository extends MongoRepository<TodoBoard, String> {
@@ -13,4 +14,6 @@ public interface TodoBoardRepository extends MongoRepository<TodoBoard, String> 
     Optional<TodoBoard> findByIdAndUserId(String id, String userId);
 
     long deleteByUserId(String userId);
+
+    List<TodoBoard> findByStatus(TodoStatus status);
 }
