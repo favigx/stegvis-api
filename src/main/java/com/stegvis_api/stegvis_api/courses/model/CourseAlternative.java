@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class CourseAlternative {
     @Id
     private final String id;
-    private final String answer;
+    private final String label;
 
-    private final boolean isCorrect;
+    private final boolean correct;
 }
