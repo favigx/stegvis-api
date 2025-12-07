@@ -1,21 +1,24 @@
-package com.stegvis_api.stegvis_api.courses.entities;
+package com.stegvis_api.stegvis_api.courses.model;
 
 import java.util.List;
 
-import com.stegvis_api.stegvis_api.courses.model.CourseQuestionGroup;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.stegvis_api.stegvis_api.courses.model.enums.CourseLevel;
 import com.stegvis_api.stegvis_api.courses.model.enums.AvailableCourses;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 
 @Builder
 @Getter
-@Setter
-@AllArgsConstructor
-public class CourseDTO {
+@RequiredArgsConstructor
+@Document(collection = "courses")
+public class Course {
+    @Id
+    private final String id;
     private final AvailableCourses course;
     private final CourseLevel level;
     private final List<CourseQuestionGroup> questionGroups;

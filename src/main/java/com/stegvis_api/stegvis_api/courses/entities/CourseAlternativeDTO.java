@@ -13,5 +13,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CourseAlternativeDTO {
     private String id;
-    private String answer; 
+    private String label;
 }
