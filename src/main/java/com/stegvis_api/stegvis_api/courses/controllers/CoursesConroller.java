@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/courses")
 public class CoursesConroller {
 
-    private CoursesService service;
+    private final CoursesService service;
 
     @GetMapping("/{course}/{level}")
     public ResponseEntity<CourseDTO> getCourseByLevel(@PathVariable AvailableCourses course,
-            @PathVariable CourseLevel level) {
+            @PathVariable String level) {
         return ResponseEntity.ok(service.getCourseByLevel(course, level));
     }
 

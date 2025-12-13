@@ -1,5 +1,7 @@
 package com.stegvis_api.stegvis_api.courses.model.enums;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum CourseLevel {
     LEVEL_1(1),
     LEVEL_2(2),
@@ -17,7 +19,7 @@ public enum CourseLevel {
     }
 
     @com.fasterxml.jackson.annotation.JsonCreator
-    public static CourseLevel fromCode(int code) {
+    public static CourseLevel fromCode(@JsonProperty("level") int code) {
         for (CourseLevel level : values()) {
             if (level.code == code)
                 return level;

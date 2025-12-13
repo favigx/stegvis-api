@@ -17,6 +17,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CourseDTO {
     private final AvailableCourses course;
-    private final CourseLevel level;
+    private final String level;
     private final List<CourseQuestionGroup> questionGroups;
 }

@@ -18,10 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CoursesService {
 
-    private CoursesRepository repository;
+    private final CoursesRepository repository;
 
-    public CourseDTO getCourseByLevel(final AvailableCourses course, final CourseLevel level) {
-        final Course chosenCourse = repository.findByAvailableCoursesAndCourseLevel(course, level);
+    public CourseDTO getCourseByLevel(final AvailableCourses course, final String level) {
+        final Course chosenCourse = repository.findByCourseAndLevel(course, level);
 
         return CourseDTO.builder()
                 .course(course)

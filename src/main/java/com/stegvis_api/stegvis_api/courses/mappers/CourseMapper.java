@@ -1,5 +1,7 @@
 package com.stegvis_api.stegvis_api.courses.mappers;
 
+import java.util.Objects;
+
 import com.stegvis_api.stegvis_api.courses.model.CourseAlternative;
 import com.stegvis_api.stegvis_api.courses.model.CourseQuestion;
 import com.stegvis_api.stegvis_api.courses.model.CourseQuestionGroup;
@@ -16,15 +18,24 @@ public class CourseMapper {
         return CourseQuestionGroup.builder()
                 .index(requestGroup.getIndex())
                 .key(requestGroup.getKey())
+                .title(requestGroup.getTitle())
                 .contentHtml(requestGroup.getContentHtml())
-                .questions(requestGroup.getQuestions()
-                        .stream()
-                        .map(question -> mapToCourseQuestion(question))
-                        .toList())
+                .questions(
+                        requestGroup.getQuestions() == null
+                                ? null
+                                : requestGroup.getQuestions()
+                                        .stream()
+                                        .filter(question -> question != null)
+                                        .map(question -> mapToCourseQuestion(question))
+                                        .toList())
                 .build();
     }
 
     private static CourseQuestion mapToCourseQuestion(final CourseQuestionRequest requestQuestion) {
+        if (requestQuestion == null) {
+            return null;
+        }
+
         return CourseQuestion.builder()
                 .index(requestQuestion.getIndex())
                 .label(requestQuestion.getLabel())

@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CoursesRepository extends MongoRepository<Course, String> {
 
-    Course findByAvailableCoursesAndCourseLevel(AvailableCourses course, CourseLevel level);
+    Course findByCourseAndLevel(AvailableCourses course, String level);
 
     List<Course> findAll();
 }
